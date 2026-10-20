@@ -7,3 +7,4 @@ pnpm-lock.yaml
 docs/dist
 docs/.astro
 docs/node_modules
+docs/src/data

@@ -1,0 +1,9 @@
+{
+    "basic": { "icon": "lucide:heart" },
+    "attributes": { "icon": "lucide:trash-2", "attributes": { "class": "text-danger", "aria-label": "Delete" } },
+    "token-list": { "icon": "lucide:star", "attributes": { "class": ["icon", null, "active"], "style": { "color": "#e8a33d", "rotate": null } } },
+    "booleans": { "icon": "lucide:bell", "attributes": { "data-unread": true, "aria-hidden": false, "focusable": false } },
+    "data-json": { "icon": "lucide:settings", "attributes": { "data-config": { "panel": "a/b", "label": "Réglages" } } },
+    "size": { "icon": "lucide:check", "attributes": { "width": 48, "height": 48, "class": "text-success" } },
+    "alias": { "icon": "delete" }
+}

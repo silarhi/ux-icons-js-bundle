@@ -5,6 +5,8 @@ export default defineSilarhiDocs({
     title: 'UX Icons JS Bundle',
     description:
         'Render Symfony UX Icons in JavaScript, React and Vue, with the same attributes, configuration and HTML as ux_icon().',
+    // The examples import the package sources from ../assets
+    astro: { vite: { server: { fs: { allow: ['..'] } } } },
     sidebar: [
         { label: 'Getting started', items: [{ autogenerate: { directory: 'getting-started' } }] },
         { label: 'JavaScript', items: [{ autogenerate: { directory: 'javascript' } }] },

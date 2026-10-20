@@ -97,7 +97,7 @@ const icon = <UXIcon icon={LucideTrash2Icon} className="text-danger" aria-label=
 
 Everything else is on **[ux-icons-js-bundle.silarhi.dev](https://ux-icons-js-bundle.silarhi.dev)**:
 
-- [Installation](https://ux-icons-js-bundle.silarhi.dev/getting-started/installation/) and [quick start](https://ux-icons-js-bundle.silarhi.dev/getting-started/quick-start/)
+- [Installation](https://ux-icons-js-bundle.silarhi.dev/getting-started/installation/), [quick start](https://ux-icons-js-bundle.silarhi.dev/getting-started/quick-start/) and [live examples](https://ux-icons-js-bundle.silarhi.dev/getting-started/live-examples/)
 - JavaScript: [vanilla](https://ux-icons-js-bundle.silarhi.dev/javascript/vanilla/), [dynamic names](https://ux-icons-js-bundle.silarhi.dev/javascript/dynamic-names/), [attributes](https://ux-icons-js-bundle.silarhi.dev/javascript/attributes/), [React](https://ux-icons-js-bundle.silarhi.dev/javascript/react/), [Vue](https://ux-icons-js-bundle.silarhi.dev/javascript/vue/)
 - PHP: [dumping icons](https://ux-icons-js-bundle.silarhi.dev/php/dumping/), [remote icons](https://ux-icons-js-bundle.silarhi.dev/php/remote-icons/), [Webpack Encore and AssetMapper](https://ux-icons-js-bundle.silarhi.dev/php/asset-mapper/)
 - Reference: [configuration](https://ux-icons-js-bundle.silarhi.dev/reference/configuration/), [compatibility](https://ux-icons-js-bundle.silarhi.dev/reference/compatibility/), [differences with symfony/ux#4072](https://ux-icons-js-bundle.silarhi.dev/reference/differences/)

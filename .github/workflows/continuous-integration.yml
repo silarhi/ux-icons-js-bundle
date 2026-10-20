@@ -128,6 +128,29 @@ jobs:
             - name: Build
               run: pnpm build
 
+    docs-examples:
+        name: Docs examples
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v7
+            # ux_icon() normalizes attributes since symfony/ux-icons 3, which needs PHP 8.4+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '8.5'
+                  coverage: none
+            - name: Install dependencies
+              run: composer update --no-interaction --no-progress
+            # docs/src/data is committed: the docs build compares it with renderIcon(), it must match the PHP side
+            - name: Render the examples
+              run: php docs/scripts/render-examples.php
+            - name: Check the committed renders are up to date
+              run: |
+                  git status --porcelain -- docs/src/data
+                  test -z "$(git status --porcelain -- docs/src/data)" || { echo '::error::Run php docs/scripts/render-examples.php and commit docs/src/data'; exit 1; }
+
     coverage:
         name: Coverage
         needs: [qa]
@@ -140,7 +163,7 @@ jobs:
 
     ci-passed:
         name: CI passed
-        needs: [matrix, qa, lint, test, build]
+        needs: [matrix, qa, lint, test, build, docs-examples]
         if: always()
         runs-on: ubuntu-latest
         timeout-minutes: 5

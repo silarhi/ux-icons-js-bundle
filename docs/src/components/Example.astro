@@ -1,0 +1,112 @@
+---
+/**
+ * An icon rendered by the JavaScript package, next to the same icon rendered by ux_icon(), in four tabs: the preview,
+ * the JavaScript and Twig sources, and the HTML.
+ *
+ *     import Example from '../../../components/Example.astro'
+ *     <Example name="attributes" />
+ *
+ * Reads docs/examples/examples.json, the dumped icons (docs/src/data/icons/) and the ux_icon() render
+ * (docs/src/data/examples/<name>.html), from `php docs/scripts/render-examples.php`. The build fails when renderIcon()
+ * and ux_icon() do not render the same HTML.
+ */
+import { Code, TabItem, Tabs } from '@astrojs/starlight/components'
+import { renderIcon, type UXIconAttributes, type UXIconData } from '../../../assets/src/index'
+import examples from '../../examples/examples.json'
+import * as icons from '../data/icons/index.js'
+
+interface Props {
+    name: keyof typeof examples
+}
+
+const renders = import.meta.glob<string>('../data/examples/*.html', { query: '?raw', import: 'default', eager: true })
+
+const { name } = Astro.props
+const example: { icon: string; attributes?: UXIconAttributes } = examples[name]
+const attributes = example.attributes ?? {}
+const exportName = toExportName(example.icon)
+const icon = (icons as Record<string, UXIconData>)[exportName]
+const twigHtml = renders[`../data/examples/${name}.html`]
+if (icon === undefined || twigHtml === undefined) {
+    throw new Error(`Example "${name}" not found: run php docs/scripts/render-examples.php`)
+}
+
+const html = renderIcon(icon, attributes)
+if (html !== twigHtml) {
+    throw new Error(`Example "${name}": renderIcon() and ux_icon() render different HTML\n  JS:   ${html}\n  Twig: ${twigHtml}`)
+}
+
+const args = Object.keys(attributes).length > 0 ? `, ${literal(attributes)}` : ''
+const js = `import { renderIcon } from '@silarhi/ux-icons-js'
+import { ${exportName} } from '../var/icons/index.js'
+
+element.innerHTML = renderIcon(${exportName}${args})`
+const twig = `{{ ux_icon('${example.icon}'${args}) }}`
+
+/** Same as IconsDumper::exportName(): "lucide:trash-2" => "LucideTrash2Icon" */
+function toExportName(iconName: string): string {
+    const pascal = iconName
+        .split(/[:-]/)
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join('')
+
+    return /^\d/.test(pascal) ? `_${pascal}Icon` : `${pascal}Icon`
+}
+
+/** A JavaScript (and Twig) literal: { class: 'a', 'aria-label': 'b' } */
+function literal(value: unknown): string {
+    if (Array.isArray(value)) {
+        return `[${value.map(literal).join(', ')}]`
+    }
+    if (value !== null && typeof value === 'object') {
+        const entries = Object.entries(value).map(
+            ([key, item]) => `${/^[a-z_]\w*$/i.test(key) ? key : quote(key)}: ${literal(item)}`
+        )
+
+        return `{ ${entries.join(', ')} }`
+    }
+
+    return typeof value === 'string' ? quote(value) : String(value)
+}
+
+function quote(value: string): string {
+    return `'${value.replaceAll('\\', '\\\\').replaceAll("'", "\\'")}'`
+}
+---
+
+<Tabs>
+    <TabItem label="Preview">
+        <div class="ux-example not-content" set:html={html} />
+    </TabItem>
+    <TabItem label="JavaScript">
+        <Code code={js} lang="js" />
+    </TabItem>
+    <TabItem label="Twig">
+        <Code code={twig} lang="twig" />
+    </TabItem>
+    <TabItem label="HTML">
+        <Code code={html} lang="html" wrap />
+    </TabItem>
+</Tabs>
+
+<style>
+    .ux-example {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 7rem;
+        padding: 1.5rem;
+        font-size: 2rem;
+        border: 1px solid var(--sl-color-hairline);
+        border-radius: 0.5rem;
+    }
+    .ux-example :global(.text-danger) {
+        color: #d63939;
+    }
+    .ux-example :global(.text-success) {
+        color: #2fb344;
+    }
+    .ux-example :global(.active path) {
+        fill: currentColor;
+    }
+</style>

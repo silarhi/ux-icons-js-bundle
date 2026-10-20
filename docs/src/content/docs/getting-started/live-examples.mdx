@@ -1,0 +1,66 @@
+---
+title: Live examples
+description: Real icons rendered by @silarhi/ux-icons-js, checked against the HTML of ux_icon() when the documentation is built.
+sidebar:
+    order: 3
+---
+
+import Example from '../../../components/Example.astro'
+
+The icons below are rendered by `renderIcon()` from [Lucide](https://lucide.dev) icons dumped by the bundle. The
+documentation build renders each one with `ux_icon()` too, and fails if the HTML differs: what you see is what Twig
+renders. The examples use this configuration:
+
+```yaml
+# config/packages/ux_icons.yaml
+ux_icons:
+    default_icon_attributes:
+        width: 1.5em
+        height: 1.5em
+    icon_sets:
+        lucide:
+            icon_attributes:
+                class: lucide
+    aliases:
+        delete: 'lucide:trash-2'
+```
+
+## An icon
+
+The dumped attributes already carry the configuration: the default size, and the `class` of the icon set.
+`aria-hidden="true"` is added, as the icon has no text alternative.
+
+<Example name="basic" />
+
+## Attributes
+
+Given attributes override the dumped ones; `aria-label` makes the icon meaningful, so no `aria-hidden`.
+
+<Example name="attributes" />
+
+<Example name="size" />
+
+## Token lists and styles
+
+Arrays are token lists, `null` entries dropped; `style` objects are inline styles, `null` declarations dropped. See
+[attributes](/javascript/attributes/).
+
+<Example name="token-list" />
+
+## Booleans
+
+`data-*` and `aria-*` booleans become `"true"` and `"false"`, other `false` attributes are omitted.
+
+<Example name="booleans" />
+
+## JSON data attributes
+
+`data-*` arrays and objects are JSON encoded like PHP `json_encode()`.
+
+<Example name="data-json" />
+
+## Aliases
+
+An alias is dumped too, with the attributes of its target.
+
+<Example name="alias" />

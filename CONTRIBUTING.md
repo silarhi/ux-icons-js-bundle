@@ -66,6 +66,14 @@ pnpm dev # http://localhost:4321
 
 Pull requests touching `docs/` build the site; it is published once merged into `main`.
 
+The live examples render real icons with the JavaScript package, and the build fails if their HTML differs from
+`ux_icon()`. After changing `docs/examples/` (or the rendering code), regenerate and commit `docs/src/data/`; the CI
+checks it is up to date:
+
+```bash
+php docs/scripts/render-examples.php
+```
+
 ## License
 
 By contributing, you agree that your contributions are released under the [MIT License](LICENSE).

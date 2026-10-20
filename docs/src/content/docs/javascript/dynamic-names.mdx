@@ -5,6 +5,8 @@ sidebar:
     order: 5
 ---
 
+import LazyDemo from '../../../components/LazyDemo.astro'
+
 Named imports need the icon name when you write the code. When it only comes at runtime, e.g. from an API response
 like `{ "icon": "lucide:trash-2" }`, load the icon by its name with the dumped `loaders` map:
 
@@ -19,6 +21,11 @@ if (icon) {
     badge.append(createIconElement(icon, { class: 'text-success' }))
 }
 ```
+
+Try it: type a name, as if it came from an API. Each icon is downloaded on its first use only, open the network tab of
+your browser to see it.
+
+<LazyDemo />
 
 `var/icons/loaders.js` maps every dumped name, aliases included, to the module of that icon alone:
 

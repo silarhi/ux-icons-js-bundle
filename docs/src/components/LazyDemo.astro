@@ -1,0 +1,82 @@
+---
+/**
+ * A live demo of loadIcon(): the name comes from a fake API response, only that icon's chunk is downloaded.
+ *
+ * Uses the icons dumped by `php docs/scripts/render-examples.php` (docs/src/data/icons/loaders.js).
+ */
+import { loaders } from '../data/icons/loaders.js'
+
+const names = Object.keys(loaders)
+---
+
+<div class="ux-lazy-demo not-content">
+    <label>
+        API response
+        <code class="ux-lazy-response">{'{ "icon": "'}<input list="ux-lazy-names" value="lucide:heart" spellcheck="false" aria-label="Icon name" />{'" }'}</code>
+    </label>
+    <datalist id="ux-lazy-names">{names.map((name) => <option value={name} />)}</datalist>
+    <div class="ux-lazy-result" aria-live="polite"></div>
+    <p class="ux-lazy-log">Loaded: <span>none yet</span></p>
+</div>
+
+<script>
+    import { createIconElement, loadIcon } from '../../../assets/src/index'
+    import { loaders } from '../data/icons/loaders.js'
+
+    for (const demo of document.querySelectorAll<HTMLElement>('.ux-lazy-demo')) {
+        const input = demo.querySelector('input') as HTMLInputElement
+        const result = demo.querySelector('.ux-lazy-result') as HTMLElement
+        const log = demo.querySelector('.ux-lazy-log span') as HTMLElement
+        const loaded: string[] = []
+
+        const render = async () => {
+            const name = input.value.trim()
+            const icon = await loadIcon(loaders, name).catch(() => null)
+            if (input.value.trim() !== name) {
+                return // a newer name was typed meanwhile
+            }
+            if (icon === null) {
+                result.replaceChildren(document.createTextNode(`loadIcon() resolved to null: "${name}" is not dumped`))
+                return
+            }
+            if (!loaded.includes(icon.name)) {
+                loaded.push(icon.name)
+                log.textContent = loaded.join(', ')
+            }
+            result.replaceChildren(createIconElement(icon, { width: '3em', height: '3em', 'aria-label': icon.name }))
+        }
+
+        input.addEventListener('input', render)
+        render()
+    }
+</script>
+
+<style>
+    .ux-lazy-demo {
+        display: grid;
+        gap: 1rem;
+        padding: 1.5rem;
+        border: 1px solid var(--sl-color-hairline);
+        border-radius: 0.5rem;
+    }
+    .ux-lazy-response input {
+        width: 14ch;
+        font: inherit;
+        color: var(--sl-color-text-accent);
+        background: transparent;
+        border: 0;
+        border-bottom: 1px dashed var(--sl-color-gray-3);
+    }
+    .ux-lazy-result {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 4rem;
+        color: var(--sl-color-gray-2);
+    }
+    .ux-lazy-log {
+        margin: 0;
+        font-size: var(--sl-text-sm);
+        color: var(--sl-color-gray-3);
+    }
+</style>
