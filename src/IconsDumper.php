@@ -149,10 +149,14 @@ final readonly class IconsDumper
      */
     public static function children(string $innerSvg): array
     {
-        if (!class_exists(\Dom\HTMLDocument::class)) {
-            return self::legacyChildren($innerSvg);
-        }
+        return class_exists(\Dom\HTMLDocument::class) ? self::html5Children($innerSvg) : self::legacyChildren($innerSvg);
+    }
 
+    /**
+     * @return list<array{0: string, 1: object, 2?: list<mixed>}|string>
+     */
+    private static function html5Children(string $innerSvg): array
+    {
         // The inner SVG is serialized as HTML (see IconFactory::innerSvg()), so it is parsed like a browser parses the "ux_icon()" output
         $document = \Dom\HTMLDocument::createFromString('<!DOCTYPE html><svg>' . $innerSvg . '</svg>', \LIBXML_NOERROR);
         $svg = $document->body->firstElementChild ?? throw new RuntimeException('The icon body is not valid SVG.');

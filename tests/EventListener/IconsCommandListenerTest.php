@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Silarhi\UxIconsJsBundle\Tests\EventListener;
 
 use Closure;
+use LogicException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Silarhi\UxIconsJsBundle\EventListener\IconsCommandListener;
@@ -79,6 +80,26 @@ final class IconsCommandListenerTest extends TestCase
 
         self::assertStringNotContainsString('JavaScript: import', $output);
         self::assertStringContainsString('Dumped 1 icon(s) for JavaScript.', $output);
+    }
+
+    public function testCollisionNeverPreventsTheCommand(): void
+    {
+        (new Filesystem())->dumpFile($this->directory . '/icons/sub/check.svg', self::SVG);
+        $registry = new LocalSvgIconRegistry(new IconFactory(), $this->directory . '/icons');
+        // "sub:check" and the alias "sub-check" are both exported as "SubCheckIcon"
+        $this->listener = new IconsCommandListener(new IconsDumper(new IconResolver($registry, [], ['sub-check' => 'user']), $this->directory . '/icons', [], ['sub-check' => 'user'], $this->directory . '/dump'));
+
+        $command = new Command('ux:icons:import');
+        $input = new ArrayInput([]);
+        $output = new BufferedOutput();
+
+        // the command runs: the collision is only reported once it is done
+        $this->listener->onCommand(new ConsoleCommandEvent($command, $input, $output));
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('would both be exported as "SubCheckIcon"');
+
+        $this->listener->onTerminate(new ConsoleTerminateEvent($command, $input, $output, Command::SUCCESS));
     }
 
     public function testIgnoresOtherCommands(): void

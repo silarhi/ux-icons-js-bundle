@@ -92,6 +92,14 @@ final class IconsDumperTest extends TestCase
         $dumper->dump();
     }
 
+    public function testMissingIconSetDirectory(): void
+    {
+        $names = $this->createDumper(iconSetPaths: ['missing' => self::FIXTURES . '/missing'])->dump();
+
+        self::assertContains('user', $names);
+        self::assertSame([], array_filter($names, static fn (string $name): bool => str_starts_with($name, 'missing:')));
+    }
+
     public function testNumericAliases(): void
     {
         self::assertContains('500', $this->createDumper(aliases: ['500' => 'user'])->dump());

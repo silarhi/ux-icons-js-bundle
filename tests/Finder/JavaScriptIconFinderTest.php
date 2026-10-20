@@ -56,6 +56,7 @@ final class JavaScriptIconFinderTest extends TestCase
                 type TablerTrash2Icon,
             } from '@/icons';
             TSX);
+        $fs->dumpFile($this->directory . '/plain.js', "console.log('no import');");
         $fs->dumpFile($this->directory . '/node_modules/pkg/index.js', "import { IgnoredDependencyIcon } from '../var/icons/index.js';");
 
         $icons = (new JavaScriptIconFinder([$this->directory, $this->directory . '/missing']))->icons();

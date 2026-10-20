@@ -34,6 +34,11 @@ final class SilarhiUxIconsJsBundleTest extends TestCase
         self::assertSame([['asset_mapper' => ['paths' => ['/app/var/js-icons' => 'var/icons']]]], $config);
     }
 
+    public function testDoesNotPrependWithoutFrameworkBundle(): void
+    {
+        self::assertSame([], $this->prepend([], []));
+    }
+
     public function testDoesNotPrependWithoutAssetMapper(): void
     {
         self::assertSame([], $this->prepend([], ['FrameworkBundle' => ['path' => __DIR__]]));

@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Silarhi\UxIconsJsBundle;
 
+use function assert;
+
 use Override;
 use Silarhi\UxIconsJsBundle\CacheWarmer\IconsDumperCacheWarmer;
 use Silarhi\UxIconsJsBundle\Command\DumpIconsCommand;
@@ -20,6 +22,7 @@ use Silarhi\UxIconsJsBundle\DependencyInjection\UxIconsConfigurationPass;
 use Silarhi\UxIconsJsBundle\EventListener\IconsCommandListener;
 use Silarhi\UxIconsJsBundle\Finder\JavaScriptIconFinder;
 use Symfony\Component\AssetMapper\AssetMapperInterface;
+use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\DependencyInjection\Argument\AbstractArgument;
@@ -74,11 +77,11 @@ final class SilarhiUxIconsJsBundle extends AbstractBundle
             return;
         }
 
-        // The configuration is not processed yet: process it to know the dump directory
+        // The configuration is not processed yet: process it to know the dump directory (an AbstractBundle always has one)
         $extension = $this->getContainerExtension();
-        if (!$extension instanceof ConfigurationExtensionInterface || !($configuration = $extension->getConfiguration([], $builder)) instanceof \Symfony\Component\Config\Definition\ConfigurationInterface) {
-            return;
-        }
+        assert($extension instanceof ConfigurationExtensionInterface);
+        $configuration = $extension->getConfiguration([], $builder);
+        assert($configuration instanceof ConfigurationInterface);
 
         /** @var array{dump_directory: string} $config */
         $config = (new Processor())->processConfiguration($configuration, $builder->getExtensionConfig($extension->getAlias()));
@@ -139,14 +142,11 @@ final class SilarhiUxIconsJsBundle extends AbstractBundle
 
     private function isAssetMapperAvailable(ContainerBuilder $builder): bool
     {
-        if (!interface_exists(AssetMapperInterface::class)) {
-            return false;
-        }
-
-        // Before Symfony 8.2, FrameworkBundle provided the AssetMapper configuration.
         /** @var array<string, array{path: string}> $bundlesMetadata */
         $bundlesMetadata = $builder->getParameter('kernel.bundles_metadata');
-        if (!isset($bundlesMetadata['FrameworkBundle'])) {
+
+        // Before Symfony 8.2, FrameworkBundle provided the AssetMapper configuration.
+        if (!interface_exists(AssetMapperInterface::class) || !isset($bundlesMetadata['FrameworkBundle'])) {
             return false;
         }
 
