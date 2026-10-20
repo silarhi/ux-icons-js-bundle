@@ -1,7 +1,9 @@
 ---
 /**
- * An icon rendered by the JavaScript package, next to the same icon rendered by ux_icon(), in four tabs: the preview,
- * the JavaScript and Twig sources, and the HTML.
+ * An icon rendered by the JavaScript package, then its JavaScript and Twig sources and its HTML in tabs.
+ *
+ * The preview stays out of <Tabs>: Starlight re-serializes the HTML of the tab panels, which turns the xmlns attribute of
+ * an inline <svg> into ":xmlns".
  *
  *     import Example from '../../../components/Example.astro'
  *     <Example name="attributes" />
@@ -74,10 +76,9 @@ function quote(value: string): string {
 }
 ---
 
+<div class="ux-example not-content"><Fragment set:html={html} /></div>
+
 <Tabs>
-    <TabItem label="Preview">
-        <div class="ux-example not-content" set:html={html} />
-    </TabItem>
     <TabItem label="JavaScript">
         <Code code={js} lang="js" />
     </TabItem>
