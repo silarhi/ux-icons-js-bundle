@@ -8,6 +8,8 @@ same git tag; the npm package version follows that tag.
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-20
+
 ### Added
 
 - Backport of [symfony/ux#4072](https://github.com/symfony/ux/pull/4072) on top of an unmodified `symfony/ux-icons`
@@ -23,3 +25,6 @@ same git tag; the npm package version follows that tag.
 
 - Compared with symfony/ux#4072, `resolveIcon()` keeps the position of an attribute dumped as `false` or given as
   `null` when it is set again, so `renderIcon()` output is byte for byte identical to `ux_icon()`.
+
+[Unreleased]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/silarhi/ux-icons-js-bundle/releases/tag/v0.1.0
