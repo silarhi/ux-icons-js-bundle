@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 import { createApp, h, nextTick, ref } from 'vue'
-import type { UXIconData } from '../src/index'
-import { UXIcon } from '../src/vue'
+import type { UXIconData, UXIconLoaders } from '../src/index'
+import { UXIcon, UXLazyIcon } from '../src/vue'
 
 const icon: UXIconData = {
     name: 'lucide:trash-2',
@@ -53,16 +53,16 @@ describe('UXIcon', () => {
     })
 })
 
-describe('UXIcon by name', () => {
+describe('UXLazyIcon', () => {
     async function flush(): Promise<void> {
         await new Promise((resolve) => setTimeout(resolve))
         await nextTick()
     }
 
-    function mountByName(props: Record<string, unknown>): HTMLElement {
+    function mountByName(props: { name?: string | null; loaders: UXIconLoaders; class?: string }): HTMLElement {
         const container = document.createElement('div')
         createApp({
-            render: () => h(UXIcon, props, { fallback: () => 'loading' }),
+            render: () => h(UXLazyIcon, props, { fallback: () => 'loading' }),
         }).mount(container)
 
         return container
@@ -100,7 +100,7 @@ describe('UXIcon by name', () => {
         }
         const name = ref('lucide:trash-2')
         const container = document.createElement('div')
-        createApp({ render: () => h(UXIcon, { name: name.value, loaders }) }).mount(container)
+        createApp({ render: () => h(UXLazyIcon, { name: name.value, loaders }) }).mount(container)
         await flush()
         expect(container.querySelector('path')?.getAttribute('d')).toBe('M3 6h18')
 

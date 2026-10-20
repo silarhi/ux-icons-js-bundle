@@ -11,8 +11,8 @@ same git tag; the npm package version follows that tag.
 ### Added
 
 - Load an icon by a name known only at runtime, e.g. from an API response: the dump adds one module per icon and
-  `var/icons/loaders.js`; `loadIcon(loaders, name)` downloads that icon alone, and the React and Vue `UXIcon`
-  components accept `name` and `loaders` instead of `icon`, with a fallback while it loads.
+  `var/icons/loaders.js`; `loadIcon(loaders, name)` downloads that icon alone, and the new React and Vue `UXLazyIcon`
+  components render it by `name`, with a fallback while it loads.
 
 ## [0.1.2] - 2026-10-20
 

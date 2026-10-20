@@ -27,11 +27,11 @@ import { LucideTrash2Icon } from '../var/icons/index.js'
 
 ## By name
 
-With an icon name known only at runtime, give `name` and the dumped `loaders` instead of `icon`; the `fallback` slot
+With an icon name known only at runtime, use `UXLazyIcon` with the `name` and the dumped `loaders`; the `fallback` slot
 renders while the icon loads, or for an unknown name:
 
 ```vue
-<UXIcon :name="data.icon" :loaders="loaders"><template #fallback>…</template></UXIcon>
+<UXLazyIcon :name="data.icon" :loaders="loaders"><template #fallback>…</template></UXLazyIcon>
 ```
 
 See [dynamic icon names](/javascript/dynamic-names/).

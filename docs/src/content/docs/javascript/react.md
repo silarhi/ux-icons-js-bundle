@@ -31,13 +31,14 @@ The dumped attributes use HTML names (`class`, `stroke-width`, `xlink:href`); th
 
 ## By name
 
-With an icon name known only at runtime, give `name` and the dumped `loaders` instead of `icon`; `fallback` renders
-while the icon loads, or for an unknown name (default: nothing):
+With an icon name known only at runtime, use `UXLazyIcon` with the `name` and the dumped `loaders`; `fallback` renders
+while the icon loads, or for an unknown name (default: nothing). Its other props are the ones of `UXIcon`:
 
 ```jsx
+import { UXLazyIcon } from '@silarhi/ux-icons-js/react'
 import { loaders } from '../var/icons/loaders.js'
 
-const icon = <UXIcon name={data.icon} loaders={loaders} fallback={null} />
+const icon = <UXLazyIcon name={data.icon} loaders={loaders} fallback={null} />
 ```
 
 See [dynamic icon names](/javascript/dynamic-names/).

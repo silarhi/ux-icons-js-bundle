@@ -30,7 +30,8 @@ export const loaders = {
 ```
 
 Your bundler splits each icon into its own chunk: importing `loaders` downloads none of them, and `loadIcon()` downloads
-only the requested one. Static imports from `index.js` are not affected, they stay in your bundle and tree-shaken.
+only the requested one. Static imports from `index.js` are not affected, they stay in your bundle and tree-shaken; and an app that only uses
+`UXIcon` does not bundle the loading code of `UXLazyIcon`.
 
 ## `loadIcon()`
 
@@ -45,20 +46,20 @@ loadIcon(loaders: UXIconLoaders, name: string | null | undefined): Promise<UXIco
 
 ## React and Vue
 
-Give the `UXIcon` component a `name` and the `loaders` instead of an `icon`. It renders the fallback while the icon
-loads, or for an unknown name:
+`UXLazyIcon` takes the `name` and the `loaders`, and the other props of `UXIcon`. It renders the fallback while the
+icon loads, or for an unknown name:
 
 ```jsx
-import { UXIcon } from '@silarhi/ux-icons-js/react'
+import { UXLazyIcon } from '@silarhi/ux-icons-js/react'
 import { loaders } from '../var/icons/loaders.js'
 
-const badge = <UXIcon name={status.icon} loaders={loaders} fallback={<span className="placeholder" />} />
+const badge = <UXLazyIcon name={status.icon} loaders={loaders} fallback={<span className="placeholder" />} />
 ```
 
 ```vue
-<UXIcon :name="status.icon" :loaders="loaders" class="text-success">
+<UXLazyIcon :name="status.icon" :loaders="loaders" class="text-success">
     <template #fallback><span class="placeholder" /></template>
-</UXIcon>
+</UXLazyIcon>
 ```
 
 An icon loaded earlier renders at once, without the fallback, also during a server-side render.

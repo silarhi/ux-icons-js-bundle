@@ -18,13 +18,6 @@ import {
  *     </script>
  *
  *     <UXIcon :icon="LucideTrash2Icon" class="text-danger" aria-label="Delete" />
- *
- * Or by a name known only at runtime, loading that icon alone (the "fallback" slot renders while it loads, or for an
- * unknown name):
- *
- *     import { loaders } from '../var/icons/loaders.js';
- *
- *     <UXIcon :name="data.icon" :loaders="loaders"><template #fallback>…</template></UXIcon>
  */
 export const UXIcon = defineComponent({
     name: 'UXIcon',
@@ -32,15 +25,45 @@ export const UXIcon = defineComponent({
     props: {
         icon: {
             type: Object as PropType<UXIconData>,
-            default: undefined,
+            required: true,
         },
+    },
+    setup(props, { attrs }) {
+        return () => {
+            const [attributes, passthrough] = splitAttributes(attrs)
+
+            return h(
+                'svg',
+                { ...resolveIcon(props.icon, attributes), ...passthrough },
+                mapNodes<VNode>(props.icon.children, (tag, attributes, children) => h(tag, attributes, children))
+            )
+        }
+    },
+})
+
+/**
+ * Renders an icon by a name known only at runtime, loading that icon alone, like {@link UXIcon} once loaded.
+ *
+ * The "fallback" slot renders while the icon loads, or for an unknown name.
+ *
+ *     <script setup>
+ *     import { UXLazyIcon } from '@silarhi/ux-icons-js/vue';
+ *     import { loaders } from '../var/icons/loaders.js';
+ *     </script>
+ *
+ *     <UXLazyIcon :name="data.icon" :loaders="loaders"><template #fallback>…</template></UXLazyIcon>
+ */
+export const UXLazyIcon = defineComponent({
+    name: 'UXLazyIcon',
+    inheritAttrs: false,
+    props: {
         name: {
             type: String as PropType<string | null>,
             default: undefined,
         },
         loaders: {
             type: Object as PropType<UXIconLoaders>,
-            default: undefined,
+            required: true,
         },
     },
     setup(props, { attrs, slots }) {
@@ -49,12 +72,6 @@ export const UXIcon = defineComponent({
         watch(
             () => [props.loaders, props.name] as const,
             ([loaders, name], _, onCleanup) => {
-                if (loaders === undefined) {
-                    loaded.value = null
-
-                    return
-                }
-
                 let active = true
                 onCleanup(() => {
                     active = false
@@ -78,19 +95,9 @@ export const UXIcon = defineComponent({
             { immediate: true }
         )
 
-        return () => {
-            const icon = props.icon ?? (loaded.value !== null && loaded.value.name === props.name ? loaded.value : null)
-            if (icon === null) {
-                return slots.fallback?.() ?? null
-            }
-
-            const [attributes, passthrough] = splitAttributes(attrs)
-
-            return h(
-                'svg',
-                { ...resolveIcon(icon, attributes), ...passthrough },
-                mapNodes<VNode>(icon.children, (tag, attributes, children) => h(tag, attributes, children))
-            )
-        }
+        return () =>
+            loaded.value !== null && loaded.value.name === props.name
+                ? h(UXIcon, { ...attrs, icon: loaded.value })
+                : (slots.fallback?.() ?? null)
     },
 })

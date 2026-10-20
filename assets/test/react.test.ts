@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, test, vi } from 'vitest'
 import { loadIcon, type UXIconData } from '../src/index'
-import { UXIcon, type UXIconProps } from '../src/react'
+import { UXIcon, type UXIconProps, UXLazyIcon } from '../src/react'
 
 type RenderedProps = Record<string, unknown> & { children: ReactElement<Record<string, unknown>>[] }
 
@@ -85,7 +85,7 @@ describe('UXIcon', () => {
     })
 })
 
-describe('UXIcon by name', () => {
+describe('UXLazyIcon', () => {
     // React 19 warns when act() runs outside a test environment flag
     ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
 
@@ -112,7 +112,12 @@ describe('UXIcon by name', () => {
         const pending = deferred()
         const loaders = { 'lucide:trash-2': () => pending.promise }
         const { container } = await render(
-            createElement(UXIcon, { name: 'lucide:trash-2', loaders, fallback: 'loading', className: 'text-danger' })
+            createElement(UXLazyIcon, {
+                name: 'lucide:trash-2',
+                loaders,
+                fallback: 'loading',
+                className: 'text-danger',
+            })
         )
 
         expect(container.textContent).toBe('loading')
@@ -129,7 +134,7 @@ describe('UXIcon by name', () => {
         await loadIcon(loaders, 'lucide:trash-2')
 
         const html = renderToStaticMarkup(
-            createElement(UXIcon, { name: 'lucide:trash-2', loaders, fallback: 'loading' })
+            createElement(UXLazyIcon, { name: 'lucide:trash-2', loaders, fallback: 'loading' })
         )
 
         expect(html).toContain('<svg')
@@ -139,13 +144,13 @@ describe('UXIcon by name', () => {
         const loaders = { broken: () => Promise.reject(new Error('network')) }
 
         expect(
-            (await render(createElement(UXIcon, { name: 'lucide:missing', loaders, fallback: '?' }))).container
+            (await render(createElement(UXLazyIcon, { name: 'lucide:missing', loaders, fallback: '?' }))).container
                 .textContent
         ).toBe('?')
         expect(
-            (await render(createElement(UXIcon, { name: 'broken', loaders, fallback: '?' }))).container.textContent
+            (await render(createElement(UXLazyIcon, { name: 'broken', loaders, fallback: '?' }))).container.textContent
         ).toBe('?')
-        expect((await render(createElement(UXIcon, { name: null, loaders }))).container.innerHTML).toBe('')
+        expect((await render(createElement(UXLazyIcon, { name: null, loaders }))).container.innerHTML).toBe('')
     })
 
     test('never renders the previous icon for a new name', async () => {
@@ -156,11 +161,11 @@ describe('UXIcon by name', () => {
             'lucide:x': () => pending.promise,
         }
         const { container, rerender } = await render(
-            createElement(UXIcon, { name: 'lucide:trash-2', loaders, fallback: '…' })
+            createElement(UXLazyIcon, { name: 'lucide:trash-2', loaders, fallback: '…' })
         )
         expect(container.querySelector('svg')).not.toBeNull()
 
-        await rerender(createElement(UXIcon, { name: 'lucide:x', loaders, fallback: '…' }))
+        await rerender(createElement(UXLazyIcon, { name: 'lucide:x', loaders, fallback: '…' }))
         expect(container.textContent).toBe('…')
 
         await act(async () => pending.resolve({ default: other }))
