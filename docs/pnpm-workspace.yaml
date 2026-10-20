@@ -1,3 +1,5 @@
 # Dependencies allowed to run install scripts (pnpm blocks them by default).
 # None needed so far: add an entry here if `pnpm install` fails with ERR_PNPM_IGNORED_BUILDS.
 allowBuilds: {}
+minimumReleaseAgeExclude:
+    - '@silarhi/docs-kit@0.7.0'
