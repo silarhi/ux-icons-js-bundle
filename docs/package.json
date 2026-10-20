@@ -1,0 +1,16 @@
+{
+    "name": "ux-icons-js-bundle-docs",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "astro dev",
+        "build": "astro build",
+        "preview": "astro preview"
+    },
+    "dependencies": {
+        "@astrojs/starlight": "^0.42.6",
+        "@silarhi/docs-kit": "^0.6.0",
+        "astro": "^7.3.8"
+    },
+    "packageManager": "pnpm@12.13.0"
+}

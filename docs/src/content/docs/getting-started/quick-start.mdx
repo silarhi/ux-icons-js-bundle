@@ -1,0 +1,88 @@
+---
+title: Quick start
+description: Dump your icons, import one, render it in vanilla JavaScript, React or Vue.
+sidebar:
+    order: 2
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components'
+
+## 1. Dump the icons
+
+The icons are dumped on cache warmup. Dump them by hand once, to see the result:
+
+```console
+$ php bin/console ux-icons-js:dump -v
+ * lucide:trash-2
+ * user
+
+ [OK] Dumped 2 icon(s).
+```
+
+It writes `var/icons/index.js` (and `index.d.ts` for TypeScript), one named export per local icon: `lucide:trash-2`
+becomes `LucideTrash2Icon`. Add `var/icons/` to your `.gitignore` if `var/` is not ignored already.
+
+## 2. Import an icon and render it
+
+<Tabs syncKey="framework">
+<TabItem label="JavaScript">
+
+```js
+import { createIconElement, renderIcon } from '@silarhi/ux-icons-js'
+import { LucideTrash2Icon } from '../var/icons/index.js'
+
+button.append(createIconElement(LucideTrash2Icon, { class: 'text-danger', 'aria-label': 'Delete' }))
+// or, as an HTML string
+button.innerHTML = renderIcon(LucideTrash2Icon, { class: 'text-danger', 'aria-label': 'Delete' })
+```
+
+</TabItem>
+<TabItem label="React">
+
+```jsx
+import { UXIcon } from '@silarhi/ux-icons-js/react'
+import { LucideTrash2Icon } from '../var/icons/index.js'
+
+export function DeleteButton() {
+    return (
+        <button type="button">
+            <UXIcon icon={LucideTrash2Icon} className="text-danger" aria-label="Delete" />
+        </button>
+    )
+}
+```
+
+</TabItem>
+<TabItem label="Vue">
+
+```vue
+<script setup>
+import { UXIcon } from '@silarhi/ux-icons-js/vue'
+import { LucideTrash2Icon } from '../var/icons/index.js'
+</script>
+
+<template>
+    <button type="button">
+        <UXIcon :icon="LucideTrash2Icon" class="text-danger" aria-label="Delete" />
+    </button>
+</template>
+```
+
+</TabItem>
+</Tabs>
+
+The output is the one of `{{ ux_icon('lucide:trash-2', { class: 'text-danger', 'aria-label': 'Delete' }) }}`.
+
+## 3. Use a new icon
+
+Write the import first, then lock it: `ux:icons:lock` finds the icons imported in JavaScript, downloads them and dumps
+them again.
+
+```console
+$ php bin/console ux:icons:lock
+ ✓ Imported lucide:mail (License: ISC). Render with: {{ ux_icon('lucide:mail') }}
+ JavaScript: import { LucideMailIcon }
+ // Dumped 3 icon(s) for JavaScript.
+```
+
+See [remote icons](/php/remote-icons/).
