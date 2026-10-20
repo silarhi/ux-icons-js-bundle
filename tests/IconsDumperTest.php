@@ -66,6 +66,69 @@ final class IconsDumperTest extends TestCase
         self::assertStringContainsString('export declare const SubCheckIcon: UXIconData<"sub:check">;', $dts);
     }
 
+    public function testDumpIconModulesLoadedByName(): void
+    {
+        $this->createDumper(aliases: ['me' => 'user'])->dump();
+
+        $loaders = (string) file_get_contents($this->dumpDir . '/loaders.js');
+        self::assertStringContainsString("export const loaders = {\n", $loaders);
+        self::assertStringContainsString('    "user": () => import(\'./icons/user.js\'),', $loaders);
+        self::assertStringContainsString('    "sub:check": () => import(\'./icons/sub--check.js\'),', $loaders);
+        self::assertStringContainsString('    "me": () => import(\'./icons/me.js\'),', $loaders, 'Aliases are loaded by name too.');
+
+        $user = (string) file_get_contents($this->dumpDir . '/icons/user.js');
+        self::assertStringContainsString('export default {"name":"user","attributes":{', $user);
+        self::assertStringContainsString('export default {"name":"me",', (string) file_get_contents($this->dumpDir . '/icons/me.js'));
+
+        $dts = (string) file_get_contents($this->dumpDir . '/loaders.d.ts');
+        self::assertStringContainsString("import type { UXIconLoaders } from '@silarhi/ux-icons-js';", $dts);
+        self::assertStringContainsString('export type IconName = "a:icon" | "me" | "sub:check" | "user";', $dts);
+        self::assertStringContainsString('export declare const loaders: UXIconLoaders<IconName>;', $dts);
+    }
+
+    public function testIconModulesDoNotCollideOnCaseInsensitiveFilesystems(): void
+    {
+        // "img:a:b:icon" and "img:ab:icon" are exported as "ImgABIconIcon" and "ImgAbIconIcon"
+        $this->createDumper(iconSetPaths: ['img' => self::FIXTURES . '/images'])->dump();
+
+        self::assertStringContainsString('export default {"name":"img:a:b:icon",', (string) file_get_contents($this->dumpDir . '/icons/img--a--b--icon.js'));
+        self::assertStringContainsString('export default {"name":"img:ab:icon",', (string) file_get_contents($this->dumpDir . '/icons/img--ab--icon.js'));
+    }
+
+    public function testDumpRemovesTheModulesOfRemovedIcons(): void
+    {
+        (new Filesystem())->dumpFile($this->dumpDir . '/icons/removed.js', 'stale');
+        (new Filesystem())->dumpFile($this->dumpDir . '/icons/README.md', 'not an icon module');
+
+        $this->createDumper()->dump();
+
+        self::assertFileDoesNotExist($this->dumpDir . '/icons/removed.js');
+        self::assertFileExists($this->dumpDir . '/icons/user.js');
+        self::assertFileExists($this->dumpDir . '/icons/README.md');
+    }
+
+    public function testDumpKeepsUnchangedFiles(): void
+    {
+        $dumper = $this->createDumper();
+        $dumper->dump();
+        touch($this->dumpDir . '/icons/user.js', 1_000_000_000);
+        clearstatcache();
+
+        $dumper->dump();
+        clearstatcache();
+
+        self::assertSame(1_000_000_000, filemtime($this->dumpDir . '/icons/user.js'), 'An unchanged icon module is not rewritten.');
+    }
+
+    public function testDumpWithoutIcons(): void
+    {
+        $dumper = new IconsDumper(new IconResolver(new LocalSvgIconRegistry(new IconFactory(), self::FIXTURES . '/missing')), self::FIXTURES . '/missing', [], [], $this->dumpDir);
+
+        self::assertSame([], $dumper->dump());
+        self::assertStringContainsString("export const loaders = {\n};", (string) file_get_contents($this->dumpDir . '/loaders.js'));
+        self::assertStringContainsString('export type IconName = never;', (string) file_get_contents($this->dumpDir . '/loaders.d.ts'));
+    }
+
     public function testIconNamesDoesNotDump(): void
     {
         self::assertContains('user', $this->createDumper()->iconNames());
@@ -75,11 +138,14 @@ final class IconsDumperTest extends TestCase
     public function testDumpWithoutTypeScript(): void
     {
         (new Filesystem())->dumpFile($this->dumpDir . '/index.d.ts', 'stale');
+        (new Filesystem())->dumpFile($this->dumpDir . '/loaders.d.ts', 'stale');
 
         $this->createDumper(dumpTypeScript: false)->dump();
 
         self::assertFileExists($this->dumpDir . '/index.js');
+        self::assertFileExists($this->dumpDir . '/loaders.js');
         self::assertFileDoesNotExist($this->dumpDir . '/index.d.ts');
+        self::assertFileDoesNotExist($this->dumpDir . '/loaders.d.ts');
     }
 
     public function testDumpThrowsOnExportNameCollision(): void

@@ -29,6 +29,19 @@ The dumped attributes use HTML names (`class`, `stroke-width`, `xlink:href`); th
 (`className`, `strokeWidth`, `xlinkHref`), and a dumped `style` string to a style object. A React-named prop you give
 (`strokeWidth={2}`) overrides the dumped HTML-named one.
 
+## By name
+
+With an icon name known only at runtime, give `name` and the dumped `loaders` instead of `icon`; `fallback` renders
+while the icon loads, or for an unknown name (default: nothing):
+
+```jsx
+import { loaders } from '../var/icons/loaders.js'
+
+const icon = <UXIcon name={data.icon} loaders={loaders} fallback={null} />
+```
+
+See [dynamic icon names](/javascript/dynamic-names/).
+
 ## Without `dangerouslySetInnerHTML`
 
 The SVG body is rendered as React elements, built from the dumped tree: nothing is parsed as HTML at runtime.

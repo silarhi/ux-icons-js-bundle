@@ -1,9 +1,41 @@
-import { type CSSProperties, createElement, type ReactElement, type SVGProps } from 'react'
-import { mapNodes, resolveIcon, splitAttributes, type UXIconData } from './index'
+import {
+    type CSSProperties,
+    createElement,
+    type ReactElement,
+    type ReactNode,
+    type SVGProps,
+    useEffect,
+    useState,
+} from 'react'
+import {
+    getLoadedIcon,
+    loadIcon,
+    mapNodes,
+    resolveIcon,
+    splitAttributes,
+    type UXIconData,
+    type UXIconLoaders,
+} from './index'
 
-export type UXIconProps = Omit<SVGProps<SVGSVGElement>, 'dangerouslySetInnerHTML' | 'children'> & {
-    icon: UXIconData
-}
+// "name" selects the icon to load, it is not the SVG attribute
+type SVGIconProps = Omit<SVGProps<SVGSVGElement>, 'dangerouslySetInnerHTML' | 'children' | 'name'>
+
+/**
+ * An icon imported by its export name, or loaded by a name known only at runtime.
+ */
+export type UXIconProps = SVGIconProps &
+    (
+        | { icon: UXIconData; name?: never; loaders?: never; fallback?: never }
+        | {
+              icon?: never
+              /** e.g. from an API response; unknown names render the fallback */
+              name: string | null | undefined
+              /** the "loaders" map of "var/icons/loaders.js" */
+              loaders: UXIconLoaders
+              /** rendered while the icon loads, or for an unknown name (default: nothing) */
+              fallback?: ReactNode
+          }
+    )
 
 const REACT_PROP_NAMES: Record<string, string> = {
     class: 'className',
@@ -17,9 +49,20 @@ const REACT_PROP_NAMES: Record<string, string> = {
  *     import { LucideTrash2Icon } from '../var/icons/index.js';
  *
  *     <UXIcon icon={LucideTrash2Icon} className="text-danger" aria-label="Delete" />
+ *
+ * Or by a name known only at runtime, loading that icon alone:
+ *
+ *     import { loaders } from '../var/icons/loaders.js';
+ *
+ *     <UXIcon name={data.icon} loaders={loaders} fallback={<Spinner />} />
  */
-export function UXIcon({ icon, ...props }: UXIconProps): ReactElement {
-    const [attributes, passthrough] = splitAttributes(props)
+export function UXIcon(props: UXIconProps): ReactElement {
+    if (props.icon === undefined) {
+        return createElement(LazyUXIcon, props)
+    }
+
+    const { icon, ...rest } = props
+    const [attributes, passthrough] = splitAttributes(rest)
 
     return createElement(
         'svg',
@@ -29,6 +72,31 @@ export function UXIcon({ icon, ...props }: UXIconProps): ReactElement {
             createElement(tag, toReactProps(attributes), ...children)
         )
     )
+}
+
+function LazyUXIcon({
+    name,
+    loaders,
+    fallback = null,
+    ...props
+}: SVGIconProps & { name: string | null | undefined; loaders: UXIconLoaders; fallback?: ReactNode }): ReactNode {
+    // an icon loaded earlier renders at once, without a fallback flash
+    const [icon, setIcon] = useState(() => getLoadedIcon(loaders, name))
+
+    useEffect(() => {
+        let active = true
+        loadIcon(loaders, name).then(
+            (loaded) => active && setIcon(loaded),
+            () => active && setIcon(null)
+        )
+
+        return () => {
+            active = false
+        }
+    }, [loaders, name])
+
+    // until the effect runs, the state may still hold the icon of the previous name
+    return icon !== null && icon.name === name ? createElement(UXIcon, { ...props, icon }) : fallback
 }
 
 /**

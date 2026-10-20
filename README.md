@@ -57,6 +57,7 @@ in two packages released from the same git tag:
 - **Same output as `ux_icon()`**: `default_icon_attributes`, icon set `icon_attributes`, `suffixes` and `aliases` come
   from your `ux_icons` configuration, and the attributes you give follow the `ux_icon()` rules.
 - **Tree-shaken**: `lucide:trash-2` is exported as `LucideTrash2Icon`, your bundler drops the icons you never import.
+- **Dynamic names**: an icon name from an API response loads that icon alone, `await loadIcon(loaders, data.icon)`.
 - **No `innerHTML`**: `createIconElement()` builds SVG elements, the React and Vue components render elements.
 - **Works with `ux:icons:lock`**: write the import first, run `ux:icons:lock`, the icon is downloaded and dumped.
 
@@ -97,7 +98,7 @@ const icon = <UXIcon icon={LucideTrash2Icon} className="text-danger" aria-label=
 Everything else is on **[ux-icons-js-bundle.silarhi.dev](https://ux-icons-js-bundle.silarhi.dev)**:
 
 - [Installation](https://ux-icons-js-bundle.silarhi.dev/getting-started/installation/) and [quick start](https://ux-icons-js-bundle.silarhi.dev/getting-started/quick-start/)
-- JavaScript: [vanilla](https://ux-icons-js-bundle.silarhi.dev/javascript/vanilla/), [attributes](https://ux-icons-js-bundle.silarhi.dev/javascript/attributes/), [React](https://ux-icons-js-bundle.silarhi.dev/javascript/react/), [Vue](https://ux-icons-js-bundle.silarhi.dev/javascript/vue/)
+- JavaScript: [vanilla](https://ux-icons-js-bundle.silarhi.dev/javascript/vanilla/), [dynamic names](https://ux-icons-js-bundle.silarhi.dev/javascript/dynamic-names/), [attributes](https://ux-icons-js-bundle.silarhi.dev/javascript/attributes/), [React](https://ux-icons-js-bundle.silarhi.dev/javascript/react/), [Vue](https://ux-icons-js-bundle.silarhi.dev/javascript/vue/)
 - PHP: [dumping icons](https://ux-icons-js-bundle.silarhi.dev/php/dumping/), [remote icons](https://ux-icons-js-bundle.silarhi.dev/php/remote-icons/), [Webpack Encore and AssetMapper](https://ux-icons-js-bundle.silarhi.dev/php/asset-mapper/)
 - Reference: [configuration](https://ux-icons-js-bundle.silarhi.dev/reference/configuration/), [compatibility](https://ux-icons-js-bundle.silarhi.dev/reference/compatibility/), [differences with symfony/ux#4072](https://ux-icons-js-bundle.silarhi.dev/reference/differences/)
 

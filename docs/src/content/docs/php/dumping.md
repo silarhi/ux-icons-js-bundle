@@ -55,10 +55,13 @@ then fails and names both: rename one of them.
 
 ## Files
 
-| File                   | Content                                                                                  |
-| ---------------------- | ---------------------------------------------------------------------------------------- |
-| `var/icons/index.js`   | The icons, `export const LucideTrash2Icon = { name, attributes, children }`              |
-| `var/icons/index.d.ts` | Their TypeScript types, unless [`dump_typescript`](/reference/configuration/) is `false` |
+| File                     | Content                                                                                  |
+| ------------------------ | ---------------------------------------------------------------------------------------- |
+| `var/icons/index.js`     | The icons, `export const LucideTrash2Icon = { name, attributes, children }`              |
+| `var/icons/index.d.ts`   | Their TypeScript types, unless [`dump_typescript`](/reference/configuration/) is `false` |
+| `var/icons/loaders.js`   | Icon name => module of that icon, to [load an icon by name](/javascript/dynamic-names/)  |
+| `var/icons/loaders.d.ts` | Its types, with the `IconName` union of the dumped names                                 |
+| `var/icons/icons/*.js`   | One module per icon (`lucide--trash-2.js`), loaded by `loaders.js`                       |
 
 Both are generated: do not edit or commit them. The directory is configurable with
 [`dump_directory`](/reference/configuration/).

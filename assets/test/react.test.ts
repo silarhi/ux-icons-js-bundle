@@ -1,7 +1,8 @@
-import { createElement, type ReactElement } from 'react'
+import { act, createElement, type ReactElement } from 'react'
+import { createRoot } from 'react-dom/client'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, test, vi } from 'vitest'
-import type { UXIconData } from '../src/index'
+import { loadIcon, type UXIconData } from '../src/index'
 import { UXIcon, type UXIconProps } from '../src/react'
 
 type RenderedProps = Record<string, unknown> & { children: ReactElement<Record<string, unknown>>[] }
@@ -81,5 +82,88 @@ describe('UXIcon', () => {
 
         expect(element.props.onClick).toBe(onClick)
         expect(element.props.style).toEqual({ color: 'blue' })
+    })
+})
+
+describe('UXIcon by name', () => {
+    // React 19 warns when act() runs outside a test environment flag
+    ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
+
+    async function render(
+        element: ReactElement
+    ): Promise<{ container: HTMLElement; rerender: (next: ReactElement) => Promise<void> }> {
+        const container = document.createElement('div')
+        const root = createRoot(container)
+        await act(async () => root.render(element))
+
+        return { container, rerender: async (next) => act(async () => root.render(next)) }
+    }
+
+    const deferred = () => {
+        let resolve: (value: { default: UXIconData }) => void = () => {}
+        const promise = new Promise<{ default: UXIconData }>((r) => {
+            resolve = r
+        })
+
+        return { promise, resolve }
+    }
+
+    test('renders the fallback, then the loaded icon', async () => {
+        const pending = deferred()
+        const loaders = { 'lucide:trash-2': () => pending.promise }
+        const { container } = await render(
+            createElement(UXIcon, { name: 'lucide:trash-2', loaders, fallback: 'loading', className: 'text-danger' })
+        )
+
+        expect(container.textContent).toBe('loading')
+
+        await act(async () => pending.resolve({ default: icon }))
+
+        const svg = container.querySelector('svg') as SVGSVGElement
+        expect(svg.getAttribute('class')).toBe('text-danger')
+        expect(svg.querySelector('path')?.getAttribute('d')).toBe('M3 6h18')
+    })
+
+    test('renders an icon loaded earlier at once', async () => {
+        const loaders = { 'lucide:trash-2': () => Promise.resolve({ default: icon }) }
+        await loadIcon(loaders, 'lucide:trash-2')
+
+        const html = renderToStaticMarkup(
+            createElement(UXIcon, { name: 'lucide:trash-2', loaders, fallback: 'loading' })
+        )
+
+        expect(html).toContain('<svg')
+    })
+
+    test('renders the fallback for an unknown name or a failed load', async () => {
+        const loaders = { broken: () => Promise.reject(new Error('network')) }
+
+        expect(
+            (await render(createElement(UXIcon, { name: 'lucide:missing', loaders, fallback: '?' }))).container
+                .textContent
+        ).toBe('?')
+        expect(
+            (await render(createElement(UXIcon, { name: 'broken', loaders, fallback: '?' }))).container.textContent
+        ).toBe('?')
+        expect((await render(createElement(UXIcon, { name: null, loaders }))).container.innerHTML).toBe('')
+    })
+
+    test('never renders the previous icon for a new name', async () => {
+        const other = { ...icon, name: 'lucide:x', children: [['path', { d: 'M0 0' }]] } satisfies UXIconData
+        const pending = deferred()
+        const loaders = {
+            'lucide:trash-2': () => Promise.resolve({ default: icon }),
+            'lucide:x': () => pending.promise,
+        }
+        const { container, rerender } = await render(
+            createElement(UXIcon, { name: 'lucide:trash-2', loaders, fallback: '…' })
+        )
+        expect(container.querySelector('svg')).not.toBeNull()
+
+        await rerender(createElement(UXIcon, { name: 'lucide:x', loaders, fallback: '…' }))
+        expect(container.textContent).toBe('…')
+
+        await act(async () => pending.resolve({ default: other }))
+        expect(container.querySelector('path')?.getAttribute('d')).toBe('M0 0')
     })
 })

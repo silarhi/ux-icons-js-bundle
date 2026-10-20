@@ -25,11 +25,11 @@ when@prod:
         dump_typescript: false
 ```
 
-| Option             | Default                           | Description                                                                                                 |
-| ------------------ | --------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `dump_directory`   | `%kernel.project_dir%/var/icons`  | Where `index.js` and `index.d.ts` are dumped. Mapped as `var/icons` with [AssetMapper](/php/asset-mapper/). |
-| `dump_typescript`  | `true`                            | Dumps `index.d.ts`. When `false`, a previously dumped `index.d.ts` is removed.                              |
-| `scan_directories` | `['%kernel.project_dir%/assets']` | Scanned by [`ux:icons:lock`](/php/remote-icons/#uxiconslock) for the icons imported in JavaScript.          |
+| Option             | Default                           | Description                                                                                                                                |
+| ------------------ | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `dump_directory`   | `%kernel.project_dir%/var/icons`  | Where `index.js`, `loaders.js`, the icon modules and their types are dumped. Mapped as `var/icons` with [AssetMapper](/php/asset-mapper/). |
+| `dump_typescript`  | `true`                            | Dumps `index.d.ts` and `loaders.d.ts`. When `false`, previously dumped ones are removed.                                                   |
+| `scan_directories` | `['%kernel.project_dir%/assets']` | Scanned by [`ux:icons:lock`](/php/remote-icons/#uxiconslock) for the icons imported in JavaScript.                                         |
 
 ## Reused `ux_icons` options
 

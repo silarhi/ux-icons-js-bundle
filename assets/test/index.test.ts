@@ -1,5 +1,5 @@
-import { describe, expect, test } from 'vitest'
-import { createIconElement, renderIcon, resolveIcon, type UXIconData } from '../src/index'
+import { describe, expect, test, vi } from 'vitest'
+import { createIconElement, getLoadedIcon, loadIcon, renderIcon, resolveIcon, type UXIconData } from '../src/index'
 
 const icon: UXIconData<'lucide:trash-2'> = {
     name: 'lucide:trash-2',
@@ -152,5 +152,51 @@ describe('createIconElement', () => {
         const use = svg.querySelector('use') as Element
         expect(use.getAttributeNS('http://www.w3.org/1999/xlink', 'href')).toBe('#a')
         expect(svg.lastChild?.textContent).toBe('text')
+    })
+})
+
+describe('loadIcon', () => {
+    const loader = (data: UXIconData) => vi.fn(() => Promise.resolve({ default: data }))
+
+    test('loads an icon by its name, once', async () => {
+        const trash = loader(icon)
+        const loaders = { 'lucide:trash-2': trash }
+
+        expect(getLoadedIcon(loaders, 'lucide:trash-2')).toBeNull()
+        expect(await loadIcon(loaders, 'lucide:trash-2')).toBe(icon)
+        expect(await loadIcon(loaders, 'lucide:trash-2')).toBe(icon)
+        expect(getLoadedIcon(loaders, 'lucide:trash-2')).toBe(icon)
+        expect(trash).toHaveBeenCalledOnce()
+    })
+
+    test('concurrent calls share one load', async () => {
+        const trash = loader(icon)
+        const loaders = { 'lucide:trash-2': trash }
+
+        const [first, second] = await Promise.all([
+            loadIcon(loaders, 'lucide:trash-2'),
+            loadIcon(loaders, 'lucide:trash-2'),
+        ])
+
+        expect(first).toBe(icon)
+        expect(second).toBe(icon)
+        expect(trash).toHaveBeenCalledOnce()
+    })
+
+    test.each([null, undefined, 'lucide:missing', 'toString', '__proto__'])('resolves to null for %s', async (name) => {
+        expect(await loadIcon({ 'lucide:trash-2': loader(icon) }, name)).toBeNull()
+        expect(getLoadedIcon({}, name)).toBeNull()
+    })
+
+    test('a failed load rejects and can be retried', async () => {
+        const flaky = vi
+            .fn<() => Promise<{ default: UXIconData }>>()
+            .mockRejectedValueOnce(new Error('network'))
+            .mockResolvedValueOnce({ default: icon })
+        const loaders = { 'lucide:trash-2': flaky }
+
+        await expect(loadIcon(loaders, 'lucide:trash-2')).rejects.toThrow('network')
+        expect(await loadIcon(loaders, 'lucide:trash-2')).toBe(icon)
+        expect(flaky).toHaveBeenCalledTimes(2)
     })
 })

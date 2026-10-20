@@ -25,4 +25,15 @@ import { LucideTrash2Icon } from '../var/icons/index.js'
 - **Other values** keep the Vue semantics: `:class="['a', { active: isActive }]"`, `:style="{ color: 'red' }"`, and
   listeners such as `@click`.
 
+## By name
+
+With an icon name known only at runtime, give `name` and the dumped `loaders` instead of `icon`; the `fallback` slot
+renders while the icon loads, or for an unknown name:
+
+```vue
+<UXIcon :name="data.icon" :loaders="loaders"><template #fallback>…</template></UXIcon>
+```
+
+See [dynamic icon names](/javascript/dynamic-names/).
+
 The SVG body is rendered with `h()` from the dumped tree, without `v-html`.

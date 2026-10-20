@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
-import { createApp, h } from 'vue'
+import { createApp, h, nextTick, ref } from 'vue'
 import type { UXIconData } from '../src/index'
 import { UXIcon } from '../src/vue'
 
@@ -50,5 +50,62 @@ describe('UXIcon', () => {
         mount({ onClick }).dispatchEvent(new MouseEvent('click'))
 
         expect(onClick).toHaveBeenCalledOnce()
+    })
+})
+
+describe('UXIcon by name', () => {
+    async function flush(): Promise<void> {
+        await new Promise((resolve) => setTimeout(resolve))
+        await nextTick()
+    }
+
+    function mountByName(props: Record<string, unknown>): HTMLElement {
+        const container = document.createElement('div')
+        createApp({
+            render: () => h(UXIcon, props, { fallback: () => 'loading' }),
+        }).mount(container)
+
+        return container
+    }
+
+    test('renders the fallback slot, then the loaded icon', async () => {
+        const container = mountByName({
+            name: 'lucide:trash-2',
+            loaders: { 'lucide:trash-2': () => Promise.resolve({ default: icon }) },
+            class: 'text-danger',
+        })
+        expect(container.textContent).toBe('loading')
+
+        await flush()
+
+        const svg = container.querySelector('svg') as SVGSVGElement
+        expect(svg.getAttribute('class')).toBe('text-danger')
+        expect(svg.innerHTML).toContain('<path d="M3 6h18">')
+    })
+
+    test('renders the fallback slot for an unknown name or a failed load', async () => {
+        const unknown = mountByName({ name: 'lucide:missing', loaders: {} })
+        const broken = mountByName({ name: 'broken', loaders: { broken: () => Promise.reject(new Error('network')) } })
+        await flush()
+
+        expect(unknown.textContent).toBe('loading')
+        expect(broken.textContent).toBe('loading')
+    })
+
+    test('follows the name', async () => {
+        const other = { ...icon, name: 'lucide:x', children: [['path', { d: 'M0 0' }]] } satisfies UXIconData
+        const loaders = {
+            'lucide:trash-2': () => Promise.resolve({ default: icon }),
+            'lucide:x': () => Promise.resolve({ default: other }),
+        }
+        const name = ref('lucide:trash-2')
+        const container = document.createElement('div')
+        createApp({ render: () => h(UXIcon, { name: name.value, loaders }) }).mount(container)
+        await flush()
+        expect(container.querySelector('path')?.getAttribute('d')).toBe('M3 6h18')
+
+        name.value = 'lucide:x'
+        await flush()
+        expect(container.querySelector('path')?.getAttribute('d')).toBe('M0 0')
     })
 })

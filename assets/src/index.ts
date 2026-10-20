@@ -286,3 +286,77 @@ export function splitAttributes(values: Record<string, unknown>): [UXIconAttribu
 
     return [attributes, passthrough]
 }
+
+/**
+ * Loads the module of one dumped icon, see "var/icons/loaders.js".
+ */
+export type UXIconLoader<Name extends string = string> = () => Promise<{ readonly default: UXIconData<Name> }>
+
+/**
+ * The "loaders" map dumped into "var/icons/loaders.js": icon name (aliases included) => module of the icon.
+ */
+export type UXIconLoaders<Name extends string = string> = Readonly<Record<Name, UXIconLoader<Name>>>
+
+const loadedIcons = new WeakMap<UXIconLoaders, Map<string, UXIconData>>()
+const pendingIcons = new WeakMap<UXIconLoaders, Map<string, Promise<UXIconData>>>()
+
+function cacheOf<T>(caches: WeakMap<UXIconLoaders, Map<string, T>>, loaders: UXIconLoaders): Map<string, T> {
+    let cache = caches.get(loaders)
+    if (cache === undefined) {
+        cache = new Map()
+        caches.set(loaders, cache)
+    }
+
+    return cache
+}
+
+/**
+ * Loads an icon by its name, known only at runtime (e.g. from an API response), from the dumped loaders.
+ *
+ *     import { loaders } from '../var/icons/loaders.js';
+ *
+ *     const icon = await loadIcon(loaders, data.icon);
+ *
+ * Resolves to null for a name the dump does not know (not a local icon), and rejects if the module fails to load.
+ * Each icon is loaded once: later calls resolve from the cache.
+ */
+export async function loadIcon(loaders: UXIconLoaders, name: string | null | undefined): Promise<UXIconData | null> {
+    if (name === null || name === undefined || !Object.hasOwn(loaders, name)) {
+        return null
+    }
+
+    const loaded = cacheOf(loadedIcons, loaders).get(name)
+    if (loaded !== undefined) {
+        return loaded
+    }
+
+    const pending = cacheOf(pendingIcons, loaders)
+    let promise = pending.get(name)
+    if (promise === undefined) {
+        promise = loaders[name]().then(
+            (module) => {
+                cacheOf(loadedIcons, loaders).set(name, module.default)
+                pending.delete(name)
+
+                return module.default
+            },
+            (error: unknown) => {
+                // a failed load (e.g. network) can be retried
+                pending.delete(name)
+                throw error
+            }
+        )
+        pending.set(name, promise)
+    }
+
+    return promise
+}
+
+/**
+ * Returns an icon already loaded by {@link loadIcon}, synchronously, or null.
+ *
+ * Framework adapters use it to render a loaded icon without waiting for a promise.
+ */
+export function getLoadedIcon(loaders: UXIconLoaders, name: string | null | undefined): UXIconData | null {
+    return name === null || name === undefined ? null : (loadedIcons.get(loaders)?.get(name) ?? null)
+}

@@ -38,11 +38,16 @@ return [
     '@icons' => [
         'path' => './var/icons/index.js',
     ],
+    // to load icons by name
+    '@icons/loaders' => [
+        'path' => './var/icons/loaders.js',
+    ],
 ];
 ```
 
 ```js
 import { LucideTrash2Icon } from '@icons'
+import { loaders } from '@icons/loaders'
 ```
 
 Then add the package, with the React or Vue entry point if you use one (and the framework itself):
