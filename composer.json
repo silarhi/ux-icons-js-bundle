@@ -1,6 +1,6 @@
 {
     "name": "silarhi/ux-icons-js-bundle",
-    "description": "Render Symfony UX Icons in JavaScript, React and Vue, with the same attributes and configuration as ux_icon() — the PHP companion to @silarhi/ux-icons-js",
+    "description": "Render Symfony UX Icons in JavaScript, React, Preact and Vue, with the same attributes and configuration as ux_icon() — the PHP companion to @silarhi/ux-icons-js",
     "license": "MIT",
     "type": "symfony-bundle",
     "keywords": [
@@ -9,6 +9,7 @@
         "icons",
         "svg",
         "react",
+        "preact",
         "vue"
     ],
     "authors": [

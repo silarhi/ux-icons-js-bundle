@@ -8,6 +8,12 @@ same git tag; the npm package version follows that tag.
 
 ## [Unreleased]
 
+### Added
+
+- `@silarhi/ux-icons-js/preact`: `UXIcon` and `UXLazyIcon` components for Preact 10, without `preact/compat`. Preact
+  takes HTML attribute names, so the dumped attributes are given as they are; `className` replaces the dumped class
+  like `class`.
+
 ## [0.2.0] - 2026-10-20
 
 ### Added

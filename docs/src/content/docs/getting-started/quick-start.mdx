@@ -1,6 +1,6 @@
 ---
 title: Quick start
-description: Dump your icons, import one, render it in vanilla JavaScript, React or Vue.
+description: Dump your icons, import one, render it in vanilla JavaScript, React, Preact or Vue.
 sidebar:
     order: 2
 ---
@@ -47,6 +47,22 @@ export function DeleteButton() {
     return (
         <button type="button">
             <UXIcon icon={LucideTrash2Icon} className="text-danger" aria-label="Delete" />
+        </button>
+    )
+}
+```
+
+</TabItem>
+<TabItem label="Preact">
+
+```jsx
+import { UXIcon } from '@silarhi/ux-icons-js/preact'
+import { LucideTrash2Icon } from '../var/icons/index.js'
+
+export function DeleteButton() {
+    return (
+        <button type="button">
+            <UXIcon icon={LucideTrash2Icon} class="text-danger" aria-label="Delete" />
         </button>
     )
 }
