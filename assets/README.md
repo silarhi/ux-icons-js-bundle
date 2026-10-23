@@ -6,7 +6,7 @@ Vue, with the same attributes and configuration as the `ux_icon()` Twig function
 
 ```js
 import { createIconElement, renderIcon } from '@silarhi/ux-icons-js'
-import { UXIcon } from '@silarhi/ux-icons-js/react' // or '/preact', '/vue'
+import { UXIcon } from '@silarhi/ux-icons-js/react' // or '@silarhi/ux-icons-js/preact', '@silarhi/ux-icons-js/vue'
 import { LucideTrash2Icon } from '../var/icons/index.js'
 
 element.append(createIconElement(LucideTrash2Icon, { class: 'text-danger', 'aria-label': 'Delete' }))

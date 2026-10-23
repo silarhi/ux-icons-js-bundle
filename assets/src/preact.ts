@@ -1,4 +1,4 @@
-import { type ComponentChild, type ComponentChildren, Fragment, h, type JSX, type VNode } from 'preact'
+import { type ComponentChildren, Fragment, h, type JSX } from 'preact'
 import { useEffect, useState } from 'preact/hooks'
 import {
     getLoadedIcon,
@@ -30,20 +30,22 @@ export type UXLazyIconProps = Omit<SVGIconProps, 'name'> & {
 /**
  * Renders a dumped icon, with the same attributes as the "ux_icon()" Twig function.
  *
- * Preact sets the HTML attribute names (from the YAML configuration and SVG files) as they are, without conversion.
+ * Preact takes HTML attribute names ("class", "stroke-width"), so the dumped attributes are given as they are.
  *
  *     import { LucideTrash2Icon } from '../var/icons/index.js';
  *
  *     <UXIcon icon={LucideTrash2Icon} class="text-danger" aria-label="Delete" />
  */
-export function UXIcon({ icon, className, ...props }: UXIconProps): VNode {
-    // On SVG elements, Preact sets "className" as "class" in the browser, but not on the server: it is given as "class"
-    const [attributes, passthrough] = splitAttributes(className === undefined ? props : { class: className, ...props })
+export function UXIcon({ icon, className, ...props }: UXIconProps): JSX.Element {
+    // "className" is an alias of "class" in Preact: it overrides the dumped class instead of adding a second one
+    const [attributes, passthrough] = splitAttributes(
+        className === undefined || 'class' in props ? props : { ...props, class: className }
+    )
 
     return h(
         'svg',
         { ...resolveIcon(icon, attributes), ...passthrough },
-        mapNodes<ComponentChild>(icon.children, (tag, attributes, children) => h(tag, attributes, children))
+        ...mapNodes<JSX.Element>(icon.children, (tag, attributes, children) => h(tag, attributes, ...children))
     )
 }
 
@@ -54,7 +56,7 @@ export function UXIcon({ icon, className, ...props }: UXIconProps): VNode {
  *
  *     <UXLazyIcon name={data.icon} loaders={loaders} fallback={<Spinner />} />
  */
-export function UXLazyIcon({ name, loaders, fallback = null, ...props }: UXLazyIconProps): VNode {
+export function UXLazyIcon({ name, loaders, fallback = null, ...props }: UXLazyIconProps): JSX.Element {
     // an icon loaded earlier renders at once, without a fallback flash
     const [icon, setIcon] = useState(() => getLoadedIcon(loaders, name))
 
@@ -72,5 +74,5 @@ export function UXLazyIcon({ name, loaders, fallback = null, ...props }: UXLazyI
 
     // until the effect runs, the state may still hold the icon of the previous name;
     // the fallback is wrapped as Preact < 10.25 types a component as returning a VNode or null
-    return icon !== null && icon.name === name ? UXIcon({ ...props, icon }) : h(Fragment, null, fallback)
+    return icon !== null && icon.name === name ? h(UXIcon, { ...props, icon }) : h(Fragment, null, fallback)
 }

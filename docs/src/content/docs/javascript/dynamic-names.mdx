@@ -63,6 +63,8 @@ import { loaders } from '../var/icons/loaders.js'
 const badge = <UXLazyIcon name={status.icon} loaders={loaders} fallback={<span className="placeholder" />} />
 ```
 
+With Preact, import it from `@silarhi/ux-icons-js/preact`; the props are the same, with Preact's `class`.
+
 ```vue
 <UXLazyIcon :name="status.icon" :loaders="loaders" class="text-success">
     <template #fallback><span class="placeholder" /></template>

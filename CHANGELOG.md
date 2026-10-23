@@ -8,15 +8,19 @@ same git tag; the npm package version follows that tag.
 
 ## [Unreleased]
 
-### Added
-
-- A Preact entry point, `@silarhi/ux-icons-js/preact`, with `UXIcon` and `UXLazyIcon` built on Preact itself (10 and
-  11), without `preact/compat`: the dumped attributes are set by their HTML names, and the server render is the HTML
-  of `ux_icon()`.
-
 ### Changed
 
+- `@silarhi/ux-icons-js/preact` also supports Preact 11 (`^10.0 || ^11.0`), and its types work with every Preact 10
+  release.
 - The CI also runs the JavaScript tests on the lowest supported React, Vue and Preact versions, and on Preact 10.
+
+## [0.3.0] - 2026-10-23
+
+### Added
+
+- `@silarhi/ux-icons-js/preact`: `UXIcon` and `UXLazyIcon` components for Preact 10, without `preact/compat`. Preact
+  takes HTML attribute names, so the dumped attributes are given as they are; `className` replaces the dumped class
+  like `class`.
 
 ## [0.2.0] - 2026-10-20
 
@@ -57,7 +61,8 @@ same git tag; the npm package version follows that tag.
 - Compared with symfony/ux#4072, `resolveIcon()` keeps the position of an attribute dumped as `false` or given as
   `null` when it is set again, so `renderIcon()` output is byte for byte identical to `ux_icon()`.
 
-[Unreleased]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.1.0...v0.1.1

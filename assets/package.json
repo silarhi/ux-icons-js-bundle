@@ -29,13 +29,13 @@
             "types": "./dist/index.d.mts",
             "import": "./dist/index.mjs"
         },
-        "./preact": {
-            "types": "./dist/preact.d.mts",
-            "import": "./dist/preact.mjs"
-        },
         "./react": {
             "types": "./dist/react.d.mts",
             "import": "./dist/react.mjs"
+        },
+        "./preact": {
+            "types": "./dist/preact.d.mts",
+            "import": "./dist/preact.mjs"
         },
         "./vue": {
             "types": "./dist/vue.d.mts",

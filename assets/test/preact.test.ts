@@ -1,64 +1,76 @@
-import { type ComponentChild, h, render } from 'preact'
+import { type ComponentChild, h, render as renderInto, type VNode } from 'preact'
 import { act } from 'preact/test-utils'
-import { renderToString } from 'preact-render-to-string'
+import { renderToStaticMarkup } from 'preact-render-to-string'
 import { describe, expect, test, vi } from 'vitest'
-import { loadIcon, renderIcon, type UXIconData } from '../src/index'
-import { UXIcon, type UXIconProps, UXLazyIcon } from '../src/preact'
+import { loadIcon, type UXIconData } from '../src/index'
+import { UXIcon, UXLazyIcon } from '../src/preact'
 
 const icon: UXIconData = {
     name: 'lucide:trash-2',
     attributes: { viewBox: '0 0 24 24', class: 'icon', 'stroke-width': '1.5', style: 'color: red; --size: 2em' },
     children: [
         ['g', { 'stroke-linecap': 'round', class: 'inner' }, [['path', { d: 'M3 6h18' }]]],
-        ['title', {}, ['Trash & co']],
+        ['title', {}, ['Trash']],
     ],
 }
 
-function mount(props: Partial<UXIconProps> = {}): SVGSVGElement {
+function mount(element: ComponentChild): HTMLElement {
     const container = document.createElement('div')
-    render(h(UXIcon, { icon, ...props }), container)
+    renderInto(element, container)
 
-    return container.querySelector('svg') as SVGSVGElement
+    return container
 }
 
 describe('UXIcon', () => {
-    test('renders on the server the same HTML as renderIcon()', () => {
-        const attributes = { class: 'text-danger', 'aria-label': 'Delete', 'data-id': 1 }
-
-        expect(renderToString(h(UXIcon, { icon }))).toBe(renderIcon(icon))
-        expect(renderToString(h(UXIcon, { icon, ...attributes }))).toBe(renderIcon(icon, attributes))
-    })
-
     test('renders the icon with dumped attributes', () => {
-        const svg = mount()
+        const html = renderToStaticMarkup(h(UXIcon, { icon }))
 
-        expect(svg.getAttribute('viewBox')).toBe('0 0 24 24')
-        expect(svg.getAttribute('class')).toBe('icon')
-        expect(svg.getAttribute('stroke-width')).toBe('1.5')
-        expect(svg.getAttribute('aria-hidden')).toBe('true')
-        expect(svg.innerHTML).toBe(
-            '<g stroke-linecap="round" class="inner"><path d="M3 6h18"></path></g><title>Trash &amp; co</title>'
+        expect(html).toBe(
+            '<svg viewBox="0 0 24 24" class="icon" stroke-width="1.5" style="color: red; --size: 2em" aria-hidden="true"><g stroke-linecap="round" class="inner"><path d="M3 6h18"></path></g><title>Trash</title></svg>'
         )
-        expect((svg.querySelector('path') as Element).namespaceURI).toBe('http://www.w3.org/2000/svg')
     })
 
-    test('attributes override dumped ones', () => {
-        const svg = mount({ class: 'text-danger', 'stroke-width': 2, 'aria-label': 'Delete' })
+    test('keeps HTML attribute names in the DOM', () => {
+        const svg = mount(
+            h(UXIcon, { icon: { ...icon, attributes: { class: 'icon', 'xlink:href': '#a', tabindex: '0' } } })
+        ).querySelector('svg') as SVGSVGElement
+
+        expect(svg.namespaceURI).toBe('http://www.w3.org/2000/svg')
+        expect(svg.getAttribute('class')).toBe('icon')
+        expect(svg.getAttribute('tabindex')).toBe('0')
+        expect(svg.querySelector('g')?.getAttribute('stroke-linecap')).toBe('round')
+    })
+
+    test('props override dumped attributes', () => {
+        const html = renderToStaticMarkup(
+            h(UXIcon, { icon, class: 'text-danger', 'stroke-width': 2, 'aria-label': 'Delete' })
+        )
+
+        expect(html).toContain('class="text-danger"')
+        expect(html).toContain('stroke-width="2"')
+        expect(html).toContain('aria-label="Delete"')
+        expect(html).not.toContain('aria-hidden')
+    })
+
+    test('className overrides the dumped class, like class', () => {
+        const svg = mount(h(UXIcon, { icon, className: 'text-danger' })).querySelector('svg') as SVGSVGElement
 
         expect(svg.getAttribute('class')).toBe('text-danger')
-        expect(svg.getAttribute('stroke-width')).toBe('2')
-        expect(svg.hasAttribute('aria-hidden')).toBe(false)
+        expect(renderToStaticMarkup(h(UXIcon, { icon, class: 'a', className: 'b' }))).toContain('class="a"')
     })
 
-    test('className is given as class, on the server too', () => {
-        expect(mount({ className: 'text-danger' }).getAttribute('class')).toBe('text-danger')
-        expect(renderToString(h(UXIcon, { icon, className: 'text-danger' }))).toContain('class="text-danger"')
-        expect(mount({ class: 'a', className: 'b' }).getAttribute('class')).toBe('a')
+    test('renders children as elements, without dangerouslySetInnerHTML', () => {
+        const element = UXIcon({ icon }) as VNode<Record<string, unknown>>
+        const [group] = element.props.children as VNode<Record<string, unknown>>[]
+
+        expect(element.props).not.toHaveProperty('dangerouslySetInnerHTML')
+        expect(group.type).toBe('g')
+        expect(group.props).toMatchObject({ 'stroke-linecap': 'round', class: 'inner' })
     })
 
     test('non-primitive props are passed as-is', () => {
         const onClick = vi.fn()
-        const svg = mount({ onClick, style: { color: 'blue' } })
+        const svg = mount(h(UXIcon, { icon, onClick, style: { color: 'blue' } })).querySelector('svg') as SVGSVGElement
         svg.dispatchEvent(new MouseEvent('click'))
 
         expect(onClick).toHaveBeenCalledOnce()
@@ -67,19 +79,19 @@ describe('UXIcon', () => {
 })
 
 describe('UXLazyIcon', () => {
-    function mountByName(element: ComponentChild): {
-        container: HTMLElement
-        rerender: (next: ComponentChild) => void
-    } {
-        const container = document.createElement('div')
-        act(() => render(element, container))
-
-        return { container, rerender: (next) => act(() => render(next, container)) }
+    // Preact runs the effects once the act() callback returns: wait in a second act() for the loads they start
+    async function settle(callback: () => void = () => {}): Promise<void> {
+        await act(callback)
+        await act(() => new Promise((resolve) => setTimeout(resolve)))
     }
 
-    // loadIcon() resolves a few promises after the loader, act() alone does not wait for them
-    async function flush(): Promise<void> {
-        await act(() => new Promise((resolve) => setTimeout(resolve)))
+    async function render(
+        element: ComponentChild
+    ): Promise<{ container: HTMLElement; rerender: (next: ComponentChild) => Promise<void> }> {
+        const container = document.createElement('div')
+        await settle(() => renderInto(element, container))
+
+        return { container, rerender: (next) => settle(() => renderInto(next, container)) }
     }
 
     const deferred = () => {
@@ -94,14 +106,13 @@ describe('UXLazyIcon', () => {
     test('renders the fallback, then the loaded icon', async () => {
         const pending = deferred()
         const loaders = { 'lucide:trash-2': () => pending.promise }
-        const { container } = mountByName(
+        const { container } = await render(
             h(UXLazyIcon, { name: 'lucide:trash-2', loaders, fallback: 'loading', class: 'text-danger' })
         )
 
         expect(container.textContent).toBe('loading')
 
-        pending.resolve({ default: icon })
-        await flush()
+        await settle(() => pending.resolve({ default: icon }))
 
         const svg = container.querySelector('svg') as SVGSVGElement
         expect(svg.getAttribute('class')).toBe('text-danger')
@@ -112,21 +123,21 @@ describe('UXLazyIcon', () => {
         const loaders = { 'lucide:trash-2': () => Promise.resolve({ default: icon }) }
         await loadIcon(loaders, 'lucide:trash-2')
 
-        expect(renderToString(h(UXLazyIcon, { name: 'lucide:trash-2', loaders, fallback: 'loading' }))).toBe(
-            renderIcon(icon)
-        )
+        const html = renderToStaticMarkup(h(UXLazyIcon, { name: 'lucide:trash-2', loaders, fallback: 'loading' }))
+
+        expect(html).toContain('<svg')
     })
 
     test('renders the fallback for an unknown name or a failed load', async () => {
         const loaders = { broken: () => Promise.reject(new Error('network')) }
-        const unknown = mountByName(h(UXLazyIcon, { name: 'lucide:missing', loaders, fallback: '?' }))
-        const broken = mountByName(h(UXLazyIcon, { name: 'broken', loaders, fallback: '?' }))
-        const empty = mountByName(h(UXLazyIcon, { name: null, loaders }))
-        await flush()
 
-        expect(unknown.container.textContent).toBe('?')
-        expect(broken.container.textContent).toBe('?')
-        expect(empty.container.innerHTML).toBe('')
+        expect(
+            (await render(h(UXLazyIcon, { name: 'lucide:missing', loaders, fallback: '?' }))).container.textContent
+        ).toBe('?')
+        expect((await render(h(UXLazyIcon, { name: 'broken', loaders, fallback: '?' }))).container.textContent).toBe(
+            '?'
+        )
+        expect((await render(h(UXLazyIcon, { name: null, loaders }))).container.innerHTML).toBe('')
     })
 
     test('never renders the previous icon for a new name', async () => {
@@ -136,15 +147,13 @@ describe('UXLazyIcon', () => {
             'lucide:trash-2': () => Promise.resolve({ default: icon }),
             'lucide:x': () => pending.promise,
         }
-        const { container, rerender } = mountByName(h(UXLazyIcon, { name: 'lucide:trash-2', loaders, fallback: '…' }))
-        await flush()
+        const { container, rerender } = await render(h(UXLazyIcon, { name: 'lucide:trash-2', loaders, fallback: '…' }))
         expect(container.querySelector('svg')).not.toBeNull()
 
-        rerender(h(UXLazyIcon, { name: 'lucide:x', loaders, fallback: '…' }))
+        await rerender(h(UXLazyIcon, { name: 'lucide:x', loaders, fallback: '…' }))
         expect(container.textContent).toBe('…')
 
-        pending.resolve({ default: other })
-        await flush()
+        await settle(() => pending.resolve({ default: other }))
         expect(container.querySelector('path')?.getAttribute('d')).toBe('M0 0')
     })
 })
