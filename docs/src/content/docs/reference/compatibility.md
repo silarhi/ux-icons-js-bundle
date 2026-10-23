@@ -15,7 +15,7 @@ needs (icon set paths, suffixes, the icon factory). Every combination is tested 
 
 ## On `symfony/ux-icons` 2.x
 
-Dumping, the JavaScript, React and Vue rendering, and the dump after `ux:icons:import` and `ux:icons:lock` work the
+Dumping, the JavaScript, React, Preact and Vue rendering, and the dump after `ux:icons:import` and `ux:icons:lock` work the
 same. Two things differ:
 
 ### `ux:icons:lock` does not scan JavaScript

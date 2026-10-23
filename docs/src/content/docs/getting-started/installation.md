@@ -7,10 +7,10 @@ sidebar:
 
 The repository ships two packages, released from the same git tag.
 
-| Package                      | Registry                                                               | What it does                                                                         |
-| ---------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| `silarhi/ux-icons-js-bundle` | [Packagist](https://packagist.org/packages/silarhi/ux-icons-js-bundle) | Dumps your local icons, with their configured attributes, as a JavaScript module.    |
-| `@silarhi/ux-icons-js`       | [npm](https://www.npmjs.com/package/@silarhi/ux-icons-js)              | Renders the dumped icons in vanilla JavaScript, React or Vue, like `ux_icon()` does. |
+| Package                      | Registry                                                               | What it does                                                                                 |
+| ---------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `silarhi/ux-icons-js-bundle` | [Packagist](https://packagist.org/packages/silarhi/ux-icons-js-bundle) | Dumps your local icons, with their configured attributes, as a JavaScript module.            |
+| `@silarhi/ux-icons-js`       | [npm](https://www.npmjs.com/package/@silarhi/ux-icons-js)              | Renders the dumped icons in vanilla JavaScript, React, Preact or Vue, like `ux_icon()` does. |
 
 ## Requirements
 
@@ -20,6 +20,7 @@ The repository ships two packages, released from the same git tag.
 | Symfony                                                                       | 6.4 / 7.x / 8.x |
 | [`symfony/ux-icons`](https://symfony.com/bundles/ux-icons/current/index.html) | 2.36.1+ / 3.5+  |
 | React (optional peer dependency, for `@silarhi/ux-icons-js/react`)            | 18 / 19         |
+| Preact (optional peer dependency, for `@silarhi/ux-icons-js/preact`)          | 10              |
 | Vue (optional peer dependency, for `@silarhi/ux-icons-js/vue`)                | 3               |
 
 `symfony/ux-icons` 3 needs PHP 8.4. On `symfony/ux-icons` 2.x, `ux:icons:lock` does not find the icons imported in
@@ -52,7 +53,7 @@ pnpm add @silarhi/ux-icons-js
 ```
 
 With [AssetMapper](https://symfony.com/doc/current/frontend/asset_mapper.html), add it to the import map instead (with
-the React or Vue entry point if you use it):
+the React, Preact or Vue entry point if you use it):
 
 ```bash
 php bin/console importmap:require @silarhi/ux-icons-js @silarhi/ux-icons-js/react

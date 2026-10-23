@@ -1,6 +1,6 @@
 {
     "name": "@silarhi/ux-icons-js",
-    "description": "Render Symfony UX Icons in JavaScript, React and Vue, with the same attributes and configuration as ux_icon()",
+    "description": "Render Symfony UX Icons in JavaScript, React, Preact and Vue, with the same attributes and configuration as ux_icon()",
     "version": "0.0.0-development",
     "license": "MIT",
     "author": "SILARHI <dev@silarhi.fr>",
@@ -10,6 +10,7 @@
         "icons",
         "svg",
         "react",
+        "preact",
         "vue"
     ],
     "repository": {
@@ -32,6 +33,10 @@
             "types": "./dist/react.d.mts",
             "import": "./dist/react.mjs"
         },
+        "./preact": {
+            "types": "./dist/preact.d.mts",
+            "import": "./dist/preact.mjs"
+        },
         "./vue": {
             "types": "./dist/vue.d.mts",
             "import": "./dist/vue.mjs"
@@ -47,10 +52,14 @@
         "lint:fix": "biome check --write src test"
     },
     "peerDependencies": {
+        "preact": "^10.0",
         "react": "^18.0 || ^19.0",
         "vue": "^3.0"
     },
     "peerDependenciesMeta": {
+        "preact": {
+            "optional": true
+        },
         "react": {
             "optional": true
         },
@@ -63,6 +72,8 @@
         "@types/react": "^19.3.0",
         "@types/react-dom": "^19.3.0",
         "jsdom": "^30.0.0",
+        "preact": "^10.29.8",
+        "preact-render-to-string": "^6.8.1",
         "react": "^19.3.1",
         "react-dom": "^19.3.1",
         "tsdown": "^0.23.1",
