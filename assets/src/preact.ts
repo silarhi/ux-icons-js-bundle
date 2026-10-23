@@ -1,4 +1,4 @@
-import { type ComponentChildren, h, type JSX } from 'preact'
+import { type ComponentChildren, Fragment, h, type JSX } from 'preact'
 import { useEffect, useState } from 'preact/hooks'
 import {
     getLoadedIcon,
@@ -10,7 +10,9 @@ import {
     type UXIconLoaders,
 } from './index'
 
-type SVGIconProps = Omit<JSX.SVGAttributes<SVGSVGElement>, 'dangerouslySetInnerHTML' | 'children'>
+// "SVGAttributes" moved from the JSX namespace to the "preact" module in Preact 11, the intrinsic <svg> props are in both
+// (with an "icon" HTML attribute in Preact 10)
+type SVGIconProps = Omit<JSX.IntrinsicElements['svg'], 'dangerouslySetInnerHTML' | 'children' | 'icon'>
 
 export type UXIconProps = SVGIconProps & {
     icon: UXIconData
@@ -54,7 +56,7 @@ export function UXIcon({ icon, className, ...props }: UXIconProps): JSX.Element 
  *
  *     <UXLazyIcon name={data.icon} loaders={loaders} fallback={<Spinner />} />
  */
-export function UXLazyIcon({ name, loaders, fallback = null, ...props }: UXLazyIconProps): ComponentChildren {
+export function UXLazyIcon({ name, loaders, fallback = null, ...props }: UXLazyIconProps): JSX.Element {
     // an icon loaded earlier renders at once, without a fallback flash
     const [icon, setIcon] = useState(() => getLoadedIcon(loaders, name))
 
@@ -70,6 +72,7 @@ export function UXLazyIcon({ name, loaders, fallback = null, ...props }: UXLazyI
         }
     }, [loaders, name])
 
-    // until the effect runs, the state may still hold the icon of the previous name
-    return icon !== null && icon.name === name ? h(UXIcon, { ...props, icon }) : fallback
+    // until the effect runs, the state may still hold the icon of the previous name;
+    // the fallback is wrapped as Preact < 10.25 types a component as returning a VNode or null
+    return icon !== null && icon.name === name ? h(UXIcon, { ...props, icon }) : h(Fragment, null, fallback)
 }

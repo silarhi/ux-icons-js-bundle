@@ -1,8 +1,8 @@
 # @silarhi/ux-icons-js
 
 Render the [Symfony UX Icons](https://symfony.com/bundles/ux-icons/current/index.html) dumped by
-[`silarhi/ux-icons-js-bundle`](https://github.com/silarhi/ux-icons-js-bundle) in vanilla JavaScript, React, Preact or Vue, with
-the same attributes and configuration as the `ux_icon()` Twig function, without `innerHTML`.
+[`silarhi/ux-icons-js-bundle`](https://github.com/silarhi/ux-icons-js-bundle) in vanilla JavaScript, React, Preact or
+Vue, with the same attributes and configuration as the `ux_icon()` Twig function, without `innerHTML`.
 
 ```js
 import { createIconElement, renderIcon } from '@silarhi/ux-icons-js'

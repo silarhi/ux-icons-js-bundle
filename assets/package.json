@@ -52,7 +52,7 @@
         "lint:fix": "biome check --write src test"
     },
     "peerDependencies": {
-        "preact": "^10.0",
+        "preact": "^10.0 || ^11.0",
         "react": "^18.0 || ^19.0",
         "vue": "^3.0"
     },
@@ -72,7 +72,7 @@
         "@types/react": "^19.3.0",
         "@types/react-dom": "^19.3.0",
         "jsdom": "^30.0.0",
-        "preact": "^10.29.8",
+        "preact": "^11.0.1",
         "preact-render-to-string": "^6.8.1",
         "react": "^19.3.1",
         "react-dom": "^19.3.1",

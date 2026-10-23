@@ -64,8 +64,8 @@ in two packages released from the same git tag:
 ## Requirements
 
 PHP 8.2+, Symfony 6.4 / 7.x / 8.x, `symfony/ux-icons` 2.36.1+ or 3.5+ (3.x needs PHP 8.4; see the
-[compatibility notes](https://ux-icons-js-bundle.silarhi.dev/reference/compatibility/) for 2.x). React 18/19, Preact 10 and Vue 3
-are optional peer dependencies.
+[compatibility notes](https://ux-icons-js-bundle.silarhi.dev/reference/compatibility/) for 2.x). React 18/19,
+Preact 10/11 and Vue 3 are optional peer dependencies.
 
 ## Installation
 

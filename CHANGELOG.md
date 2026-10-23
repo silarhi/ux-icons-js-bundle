@@ -8,6 +8,12 @@ same git tag; the npm package version follows that tag.
 
 ## [Unreleased]
 
+### Changed
+
+- `@silarhi/ux-icons-js/preact` also supports Preact 11 (`^10.0 || ^11.0`), and its types work with every Preact 10
+  release.
+- The CI also runs the JavaScript tests on the lowest supported React, Vue and Preact versions, and on Preact 10.
+
 ## [0.3.0] - 2026-10-23
 
 ### Added

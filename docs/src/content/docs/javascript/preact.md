@@ -12,10 +12,10 @@ import { LucideTrash2Icon } from '../var/icons/index.js'
 const icon = <UXIcon icon={LucideTrash2Icon} class="text-danger" aria-label="Delete" />
 ```
 
-`UXIcon` takes the icon in its `icon` prop and any SVG prop (`JSX.SVGAttributes<SVGSVGElement>`), except `children`
-and `dangerouslySetInnerHTML`. It works with Preact 10, without `preact/compat`, on the client and on the server
-(`preact-render-to-string`). With `preact/compat` aliased as `react`, the [React component](/javascript/react/) works
-too, but this one skips the compat layer.
+`UXIcon` takes the icon in its `icon` prop and any SVG prop (`JSX.IntrinsicElements['svg']`), except `children` and
+`dangerouslySetInnerHTML`. It works with Preact 10 and 11, without `preact/compat`, on the client and on the server
+(`preact-render-to-string`), where it renders the same HTML as `ux_icon()`. With `preact/compat` aliased as `react`,
+the [React component](/javascript/react/) works too, but this one skips the compat layer.
 
 ## Props
 
@@ -30,6 +30,8 @@ too, but this one skips the compat layer.
 Preact takes HTML attribute names, so the dumped attributes (`class`, `stroke-width`, `xlink:href`) are given as they
 are, and so are yours: write `stroke-width="2"`, not `strokeWidth`. `className` replaces the dumped class like `class`
 does; when both are given, `class` wins.
+
+In the browser, Preact renders a dumped `xlink:href` as `href`, which every current browser supports.
 
 ## By name
 

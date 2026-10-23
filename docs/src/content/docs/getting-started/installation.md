@@ -20,7 +20,7 @@ The repository ships two packages, released from the same git tag.
 | Symfony                                                                       | 6.4 / 7.x / 8.x |
 | [`symfony/ux-icons`](https://symfony.com/bundles/ux-icons/current/index.html) | 2.36.1+ / 3.5+  |
 | React (optional peer dependency, for `@silarhi/ux-icons-js/react`)            | 18 / 19         |
-| Preact (optional peer dependency, for `@silarhi/ux-icons-js/preact`)          | 10              |
+| Preact (optional peer dependency, for `@silarhi/ux-icons-js/preact`)          | 10 / 11         |
 | Vue (optional peer dependency, for `@silarhi/ux-icons-js/vue`)                | 3               |
 
 `symfony/ux-icons` 3 needs PHP 8.4. On `symfony/ux-icons` 2.x, `ux:icons:lock` does not find the icons imported in
