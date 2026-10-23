@@ -2,7 +2,7 @@
 title: Vue
 description: The UXIcon Vue component of @silarhi/ux-icons-js/vue.
 sidebar:
-    order: 4
+    order: 5
 ---
 
 ```vue

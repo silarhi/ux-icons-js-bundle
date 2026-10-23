@@ -1,9 +1,13 @@
-import { act, createElement, type ReactElement } from 'react'
+import { createElement, type ReactElement, act as reactAct } from 'react'
 import { createRoot } from 'react-dom/client'
 import { renderToStaticMarkup } from 'react-dom/server'
+import { act as testUtilsAct } from 'react-dom/test-utils'
 import { describe, expect, test, vi } from 'vitest'
 import { loadIcon, type UXIconData } from '../src/index'
 import { UXIcon, type UXIconProps, UXLazyIcon } from '../src/react'
+
+// "act" is exported by "react" since React 18.3, and deprecated in "react-dom/test-utils" since React 19
+const act = reactAct ?? testUtilsAct
 
 type RenderedProps = Record<string, unknown> & { children: ReactElement<Record<string, unknown>>[] }
 

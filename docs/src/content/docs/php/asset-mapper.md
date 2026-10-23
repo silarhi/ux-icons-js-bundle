@@ -50,7 +50,7 @@ import { LucideTrash2Icon } from '@icons'
 import { loaders } from '@icons/loaders'
 ```
 
-Then add the package, with the React or Vue entry point if you use one (and the framework itself):
+Then add the package, with the React, Preact or Vue entry point if you use one (and the framework itself):
 
 ```bash
 php bin/console importmap:require @silarhi/ux-icons-js @silarhi/ux-icons-js/react react

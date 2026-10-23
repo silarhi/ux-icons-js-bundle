@@ -8,6 +8,16 @@ same git tag; the npm package version follows that tag.
 
 ## [Unreleased]
 
+### Added
+
+- A Preact entry point, `@silarhi/ux-icons-js/preact`, with `UXIcon` and `UXLazyIcon` built on Preact itself (10 and
+  11), without `preact/compat`: the dumped attributes are set by their HTML names, and the server render is the HTML
+  of `ux_icon()`.
+
+### Changed
+
+- The CI also runs the JavaScript tests on the lowest supported React, Vue and Preact versions, and on Preact 10.
+
 ## [0.2.0] - 2026-10-20
 
 ### Added

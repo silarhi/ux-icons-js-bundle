@@ -79,9 +79,20 @@ jobs:
               run: pnpm typecheck
 
     test:
-        name: Test
+        name: Test (${{ matrix.dependencies }})
         runs-on: ubuntu-latest
         timeout-minutes: 15
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    # the locked versions: React 19, Vue 3.5, Preact 11
+                    - dependencies: latest
+                    # the lowest versions of the peer dependency ranges
+                    - dependencies: lowest
+                      packages: react@18.0.0 react-dom@18.0.0 vue@3.0.0 preact@10.0.0
+                    - dependencies: Preact 10
+                      packages: preact@^10
         defaults:
             run:
                 working-directory: assets
@@ -100,6 +111,11 @@ jobs:
                   cache-dependency-path: 'assets/pnpm-lock.yaml'
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
+            # Only the tests run on these versions: the typecheck uses the locked types.
+            # preact 10.0.0 has a postinstall script (a donation message), pnpm must skip it instead of failing.
+            - name: Install the ${{ matrix.dependencies }} versions
+              if: ${{ matrix.packages }}
+              run: pnpm add --save-dev --config.strict-dep-builds=false ${{ matrix.packages }}
             - name: Test
               run: pnpm test
 

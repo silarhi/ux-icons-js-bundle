@@ -34,7 +34,7 @@
 <h1 align="center">UX Icons JS Bundle</h1>
 
 <p align="center">
-    <strong>Render <a href="https://symfony.com/bundles/ux-icons/current/index.html">Symfony UX Icons</a> in JavaScript, React and Vue.</strong><br>
+    <strong>Render <a href="https://symfony.com/bundles/ux-icons/current/index.html">Symfony UX Icons</a> in JavaScript, React, Preact and Vue.</strong><br>
     Same attributes, same configuration, same HTML as <code>ux_icon()</code>, without <code>innerHTML</code>.
 </p>
 
@@ -50,7 +50,7 @@ in two packages released from the same git tag:
 - **`silarhi/ux-icons-js-bundle`** (PHP): dumps your local icons, with the attributes `ux_icon()` gives them, as a
   JavaScript module with one named export per icon.
 - **[`@silarhi/ux-icons-js`](https://www.npmjs.com/package/@silarhi/ux-icons-js)** (JS/TS): renders them in vanilla
-  JavaScript, React or Vue.
+  JavaScript, React, Preact or Vue.
 
 ## Features
 
@@ -58,14 +58,14 @@ in two packages released from the same git tag:
   from your `ux_icons` configuration, and the attributes you give follow the `ux_icon()` rules.
 - **Tree-shaken**: `lucide:trash-2` is exported as `LucideTrash2Icon`, your bundler drops the icons you never import.
 - **Dynamic names**: an icon name from an API response loads that icon alone, `await loadIcon(loaders, data.icon)`.
-- **No `innerHTML`**: `createIconElement()` builds SVG elements, the React and Vue components render elements.
+- **No `innerHTML`**: `createIconElement()` builds SVG elements, the React, Preact and Vue components render elements.
 - **Works with `ux:icons:lock`**: write the import first, run `ux:icons:lock`, the icon is downloaded and dumped.
 
 ## Requirements
 
 PHP 8.2+, Symfony 6.4 / 7.x / 8.x, `symfony/ux-icons` 2.36.1+ or 3.5+ (3.x needs PHP 8.4; see the
-[compatibility notes](https://ux-icons-js-bundle.silarhi.dev/reference/compatibility/) for 2.x). React 18/19 and Vue 3
-are optional peer dependencies.
+[compatibility notes](https://ux-icons-js-bundle.silarhi.dev/reference/compatibility/) for 2.x). React 18/19,
+Preact 10/11 and Vue 3 are optional peer dependencies.
 
 ## Installation
 
@@ -85,7 +85,7 @@ The icons are dumped into `var/icons/` on cache warmup, or with `php bin/console
 
 ```js
 import { createIconElement } from '@silarhi/ux-icons-js'
-import { UXIcon } from '@silarhi/ux-icons-js/react' // or '@silarhi/ux-icons-js/vue'
+import { UXIcon } from '@silarhi/ux-icons-js/react' // or '/preact', '/vue'
 import { LucideTrash2Icon } from '../var/icons/index.js'
 
 button.append(createIconElement(LucideTrash2Icon, { class: 'text-danger', 'aria-label': 'Delete' }))
@@ -98,7 +98,7 @@ const icon = <UXIcon icon={LucideTrash2Icon} className="text-danger" aria-label=
 Everything else is on **[ux-icons-js-bundle.silarhi.dev](https://ux-icons-js-bundle.silarhi.dev)**:
 
 - [Installation](https://ux-icons-js-bundle.silarhi.dev/getting-started/installation/), [quick start](https://ux-icons-js-bundle.silarhi.dev/getting-started/quick-start/) and [live examples](https://ux-icons-js-bundle.silarhi.dev/getting-started/live-examples/)
-- JavaScript: [vanilla](https://ux-icons-js-bundle.silarhi.dev/javascript/vanilla/), [dynamic names](https://ux-icons-js-bundle.silarhi.dev/javascript/dynamic-names/), [attributes](https://ux-icons-js-bundle.silarhi.dev/javascript/attributes/), [React](https://ux-icons-js-bundle.silarhi.dev/javascript/react/), [Vue](https://ux-icons-js-bundle.silarhi.dev/javascript/vue/)
+- JavaScript: [vanilla](https://ux-icons-js-bundle.silarhi.dev/javascript/vanilla/), [dynamic names](https://ux-icons-js-bundle.silarhi.dev/javascript/dynamic-names/), [attributes](https://ux-icons-js-bundle.silarhi.dev/javascript/attributes/), [React](https://ux-icons-js-bundle.silarhi.dev/javascript/react/), [Preact](https://ux-icons-js-bundle.silarhi.dev/javascript/preact/), [Vue](https://ux-icons-js-bundle.silarhi.dev/javascript/vue/)
 - PHP: [dumping icons](https://ux-icons-js-bundle.silarhi.dev/php/dumping/), [remote icons](https://ux-icons-js-bundle.silarhi.dev/php/remote-icons/), [Webpack Encore and AssetMapper](https://ux-icons-js-bundle.silarhi.dev/php/asset-mapper/)
 - Reference: [configuration](https://ux-icons-js-bundle.silarhi.dev/reference/configuration/), [compatibility](https://ux-icons-js-bundle.silarhi.dev/reference/compatibility/), [differences with symfony/ux#4072](https://ux-icons-js-bundle.silarhi.dev/reference/differences/)
 

@@ -2,7 +2,7 @@
 title: Dynamic icon names
 description: Render an icon whose name is only known at runtime, e.g. from an API response, loading that icon alone.
 sidebar:
-    order: 5
+    order: 6
 ---
 
 import LazyDemo from '../../../components/LazyDemo.astro'
@@ -51,7 +51,7 @@ loadIcon(loaders: UXIconLoaders, name: string | null | undefined): Promise<UXIco
   icon already loaded, synchronously.
 - Rejects if the module fails to load (e.g. a network error); the next call tries again.
 
-## React and Vue
+## React, Preact and Vue
 
 `UXLazyIcon` takes the `name` and the `loaders`, and the other props of `UXIcon`. It renders the fallback while the
 icon loads, or for an unknown name:
