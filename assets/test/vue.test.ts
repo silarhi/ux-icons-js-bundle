@@ -108,4 +108,32 @@ describe('UXLazyIcon', () => {
         await flush()
         expect(container.querySelector('path')?.getAttribute('d')).toBe('M0 0')
     })
+
+    test.each([
+        ['loads', true],
+        ['fails', false],
+    ])('keeps the icon of the new name when the previous one %s late', async (_label, succeeds) => {
+        const other = { ...icon, name: 'lucide:x', children: [['path', { d: 'M0 0' }]] } satisfies UXIconData
+        let settle: () => void = () => {}
+        const slow = new Promise<{ default: UXIconData }>((resolve, reject) => {
+            settle = () => (succeeds ? resolve({ default: icon }) : reject(new Error('network')))
+        })
+        const loaders = {
+            'lucide:trash-2': () => slow,
+            'lucide:x': () => Promise.resolve({ default: other }),
+        }
+        const name = ref('lucide:trash-2')
+        const container = document.createElement('div')
+        createApp({
+            render: () => h(UXLazyIcon, { name: name.value, loaders }, { fallback: () => 'loading' }),
+        }).mount(container)
+        name.value = 'lucide:x'
+        await flush()
+        expect(container.querySelector('path')?.getAttribute('d')).toBe('M0 0')
+
+        settle()
+        await flush()
+
+        expect(container.querySelector('path')?.getAttribute('d')).toBe('M0 0')
+    })
 })
