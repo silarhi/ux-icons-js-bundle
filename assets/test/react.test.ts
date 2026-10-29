@@ -53,6 +53,12 @@ describe('UXIcon', () => {
         })
     })
 
+    test('skips style declarations without a value', () => {
+        const element = render({ icon: { ...icon, attributes: { style: 'color: red;; bogus; --size: 2em;' } } })
+
+        expect(element.props.style).toEqual({ color: 'red', '--size': '2em' })
+    })
+
     test('renders the icon with dumped attributes', () => {
         const html = renderToStaticMarkup(createElement(UXIcon, { icon }))
 
@@ -105,11 +111,13 @@ describe('UXLazyIcon', () => {
 
     const deferred = () => {
         let resolve: (value: { default: UXIconData }) => void = () => {}
-        const promise = new Promise<{ default: UXIconData }>((r) => {
-            resolve = r
+        let reject: (reason: unknown) => void = () => {}
+        const promise = new Promise<{ default: UXIconData }>((onResolve, onReject) => {
+            resolve = onResolve
+            reject = onReject
         })
 
-        return { promise, resolve }
+        return { promise, resolve, reject }
     }
 
     test('renders the fallback, then the loaded icon', async () => {
@@ -173,6 +181,27 @@ describe('UXLazyIcon', () => {
         expect(container.textContent).toBe('…')
 
         await act(async () => pending.resolve({ default: other }))
+        expect(container.querySelector('path')?.getAttribute('d')).toBe('M0 0')
+    })
+
+    test.each([
+        ['loads', (slow: ReturnType<typeof deferred>) => slow.resolve({ default: icon })],
+        ['fails', (slow: ReturnType<typeof deferred>) => slow.reject(new Error('network'))],
+    ])('keeps the icon of the new name when the previous one %s late', async (_label, settle) => {
+        const other = { ...icon, name: 'lucide:x', children: [['path', { d: 'M0 0' }]] } satisfies UXIconData
+        const slow = deferred()
+        const loaders = {
+            'lucide:trash-2': () => slow.promise,
+            'lucide:x': () => Promise.resolve({ default: other }),
+        }
+        const { container, rerender } = await render(
+            createElement(UXLazyIcon, { name: 'lucide:trash-2', loaders, fallback: '…' })
+        )
+        await rerender(createElement(UXLazyIcon, { name: 'lucide:x', loaders, fallback: '…' }))
+        expect(container.querySelector('path')?.getAttribute('d')).toBe('M0 0')
+
+        await act(async () => settle(slow))
+
         expect(container.querySelector('path')?.getAttribute('d')).toBe('M0 0')
     })
 })
