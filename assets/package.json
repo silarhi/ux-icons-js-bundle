@@ -46,6 +46,7 @@
     "scripts": {
         "build": "tsdown",
         "test": "vitest run",
+        "test:coverage": "vitest run --coverage",
         "test:watch": "vitest",
         "typecheck": "tsc --noEmit",
         "lint": "biome check src test",
@@ -71,6 +72,7 @@
         "@biomejs/biome": "2.6.3",
         "@types/react": "^19.3.0",
         "@types/react-dom": "^19.3.0",
+        "@vitest/coverage-v8": "^5.0.5",
         "jsdom": "^30.0.0",
         "preact": "^11.0.1",
         "preact-render-to-string": "^6.8.1",
