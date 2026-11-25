@@ -12,15 +12,22 @@ declare(strict_types=1);
  */
 
 use Rector\Config\RectorConfig;
+use Rector\Symfony\CodeQuality\Rector\Class_\EventSubscriberToAttributeRector;
 
 return RectorConfig::configure()
     ->withPaths([
         'src',
         'tests',
     ])
-    ->withPhpSets(php82: true)
+    ->withPhpSets()
+    ->withComposerBased()
     ->withPreparedSets(
         deadCode: true,
         codeQuality: true,
         typeDeclarations: true,
-    );
+    )
+    ->withSkip([
+        // The bundle registers its services without autoconfiguration: #[AsEventListener] would not be read
+        EventSubscriberToAttributeRector::class,
+    ])
+    ->reportUnusedSkips();
