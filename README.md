@@ -63,6 +63,8 @@ in two packages released from the same git tag:
 - **Tree-shaken**: `lucide:trash-2` is exported as `LucideTrash2Icon`, your bundler drops the icons you never import.
 - **Dynamic names**: an icon name from an API response loads that icon alone, `await loadIcon(loaders, data.icon)`,
   `useIcon()` in React, Preact and Vue, typed with the dumped names.
+- **`<ux-icon name="lucide:trash-2">`**: a custom element for Twig templates, Turbo Streams and Stimulus, replaced by
+  the `<svg>` of `ux_icon()`.
 - **No `innerHTML`**: `createIconElement()` builds SVG elements, the React, Preact and Vue components render elements.
 - **Works with `ux:icons:lock`**: write the import first, run `ux:icons:lock`, the icon is downloaded and dumped.
 
@@ -103,7 +105,7 @@ const icon = <UXIcon icon={LucideTrash2Icon} className="text-danger" aria-label=
 Everything else is on **[ux-icons-js-bundle.silarhi.dev](https://ux-icons-js-bundle.silarhi.dev)**:
 
 - [Installation](https://ux-icons-js-bundle.silarhi.dev/getting-started/installation/), [quick start](https://ux-icons-js-bundle.silarhi.dev/getting-started/quick-start/) and [live examples](https://ux-icons-js-bundle.silarhi.dev/getting-started/live-examples/)
-- JavaScript: [vanilla](https://ux-icons-js-bundle.silarhi.dev/javascript/vanilla/), [dynamic names](https://ux-icons-js-bundle.silarhi.dev/javascript/dynamic-names/), [attributes](https://ux-icons-js-bundle.silarhi.dev/javascript/attributes/), [React](https://ux-icons-js-bundle.silarhi.dev/javascript/react/), [Preact](https://ux-icons-js-bundle.silarhi.dev/javascript/preact/), [Vue](https://ux-icons-js-bundle.silarhi.dev/javascript/vue/)
+- JavaScript: [vanilla](https://ux-icons-js-bundle.silarhi.dev/javascript/vanilla/), [dynamic names](https://ux-icons-js-bundle.silarhi.dev/javascript/dynamic-names/), [`<ux-icon>`](https://ux-icons-js-bundle.silarhi.dev/javascript/custom-element/), [attributes](https://ux-icons-js-bundle.silarhi.dev/javascript/attributes/), [React](https://ux-icons-js-bundle.silarhi.dev/javascript/react/), [Preact](https://ux-icons-js-bundle.silarhi.dev/javascript/preact/), [Vue](https://ux-icons-js-bundle.silarhi.dev/javascript/vue/)
 - PHP: [dumping icons](https://ux-icons-js-bundle.silarhi.dev/php/dumping/), [remote icons](https://ux-icons-js-bundle.silarhi.dev/php/remote-icons/), [Webpack Encore and AssetMapper](https://ux-icons-js-bundle.silarhi.dev/php/asset-mapper/)
 - Reference: [configuration](https://ux-icons-js-bundle.silarhi.dev/reference/configuration/), [compatibility](https://ux-icons-js-bundle.silarhi.dev/reference/compatibility/), [differences with symfony/ux#4072](https://ux-icons-js-bundle.silarhi.dev/reference/differences/)
 

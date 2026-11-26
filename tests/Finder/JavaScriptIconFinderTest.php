@@ -70,6 +70,26 @@ final class JavaScriptIconFinderTest extends TestCase
         self::assertSame([], array_filter($icons, static fn (string $name): bool => str_starts_with($name, 'controller')), 'Only icon modules are scanned.');
     }
 
+    public function testFindIconsOfElements(): void
+    {
+        $fs = new Filesystem();
+        $fs->dumpFile($this->directory . '/show.html.twig', <<<'TWIG'
+            <ux-icon name="lucide:trash-2" class="text-danger"></ux-icon>
+            <ux-icon class="icon" name='mdi:home'>…</ux-icon>
+            <ux-icon name="{{ icon }}"></ux-icon>
+            <ux-icon-other name="lucide:other"></ux-icon-other>
+            <div name="lucide:div"></div>
+            TWIG);
+        $fs->dumpFile($this->directory . '/list.js', <<<'JS'
+            list.innerHTML = items.map((item) => `<ux-icon name="${item.icon}"></ux-icon>`).join('') + '<UX-ICON NAME="lucide:x">'
+            JS);
+
+        $icons = (new JavaScriptIconFinder([$this->directory]))->icons();
+        sort($icons);
+
+        self::assertSame(['lucide:trash-2', 'lucide:x', 'mdi:home'], $icons);
+    }
+
     public function testFindNothingWithoutDirectories(): void
     {
         self::assertSame([], (new JavaScriptIconFinder([$this->directory]))->icons());

@@ -37,9 +37,10 @@ $ php bin/console ux:icons:lock
  // Dumped 44 icon(s) for JavaScript.
 ```
 
-The bundle scans the `.js`, `.mjs`, `.jsx`, `.ts`, `.mts`, `.tsx`, `.vue` and `.svelte` files of
-[`scan_directories`](/reference/configuration/) (`assets/` by default, `node_modules/` and `vendor/` excluded) for
-named imports from a module whose path contains `icons`. Aliased imports (`LucideXIcon as Close`) are found too, type
+The bundle scans the `.js`, `.mjs`, `.jsx`, `.ts`, `.mts`, `.tsx`, `.vue`, `.svelte`, `.html` and `.twig` files of
+[`scan_directories`](/reference/configuration/) (`assets/` and `templates/` by default, `node_modules/` and `vendor/`
+excluded) for named imports from a module whose path contains `icons`, and for the names of the
+[`<ux-icon>` elements](/javascript/custom-element/). Aliased imports (`LucideXIcon as Close`) are found too, type
 imports are not.
 
 An export name can come from several icon names (`LucideTrash2Icon` is `lucide:trash-2` or `lucide:trash2`): every

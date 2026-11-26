@@ -14,6 +14,9 @@ same git tag; the npm package version follows that tag.
 
 - In `dev`, adding, changing or removing an SVG file of the icon directory or of an icon set `path` dumps the icons
   again: the directories are tracked by the container, like the translation directories.
+- `@silarhi/ux-icons-js/element`: `defineIconElement(loaders)` registers a `<ux-icon name="…">` custom element, a
+  placeholder replaced by the `<svg>` of `ux_icon()` once its icon is loaded, for Twig templates, Turbo Streams and
+  Stimulus controllers. `ux:icons:lock` finds the names of these elements.
 - `useIcon(loaders, name)`: a React and Preact hook, and a Vue composable, returning an icon loaded by its name.
 - `preloadIcons(loaders, names)` loads several icons at once, `hasIcon(loaders, name)` tells whether the dump knows a
   name.
@@ -24,6 +27,7 @@ same git tag; the npm package version follows that tag.
 
 - `loadIcon()`, `getLoadedIcon()`, `useIcon()` and `UXLazyIcon` type the names from the loaders: editors suggest the
   dumped names, any other string is still accepted. The types need TypeScript 5.4+.
+- `scan_directories` also scans `templates/` by default, and `.html` and `.twig` files.
 - React and Preact `UXLazyIcon` render an icon loaded earlier at once when their `name` changes.
 
 ## [0.3.1] - 2026-10-23
