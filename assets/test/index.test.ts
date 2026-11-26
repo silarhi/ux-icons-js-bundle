@@ -4,6 +4,7 @@ import {
     getLoadedIcon,
     hasIcon,
     loadIcon,
+    preloadIcons,
     renderIcon,
     resolveIcon,
     type UXIconData,
@@ -217,6 +218,20 @@ describe('loadIcon', () => {
         [undefined, false],
     ])('hasIcon(%s) is %s', (name, expected) => {
         expect(hasIcon({ 'lucide:trash-2': loader(icon) }, name)).toBe(expected)
+    })
+
+    test('preloads several icons at once', async () => {
+        const trash = loader(icon)
+        const loaders = { 'lucide:trash-2': trash }
+
+        expect(await preloadIcons(loaders, ['lucide:trash-2', 'lucide:missing', null, 'lucide:trash-2'])).toEqual([
+            icon,
+            null,
+            null,
+            icon,
+        ])
+        expect(getLoadedIcon(loaders, 'lucide:trash-2')).toBe(icon)
+        expect(trash).toHaveBeenCalledOnce()
     })
 
     test('icon names are typed from the loaders', async () => {

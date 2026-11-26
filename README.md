@@ -61,7 +61,8 @@ in two packages released from the same git tag:
 - **Same output as `ux_icon()`**: `default_icon_attributes`, icon set `icon_attributes`, `suffixes` and `aliases` come
   from your `ux_icons` configuration, and the attributes you give follow the `ux_icon()` rules.
 - **Tree-shaken**: `lucide:trash-2` is exported as `LucideTrash2Icon`, your bundler drops the icons you never import.
-- **Dynamic names**: an icon name from an API response loads that icon alone, `await loadIcon(loaders, data.icon)`.
+- **Dynamic names**: an icon name from an API response loads that icon alone, `await loadIcon(loaders, data.icon)`,
+  `useIcon()` in React, Preact and Vue, typed with the dumped names.
 - **No `innerHTML`**: `createIconElement()` builds SVG elements, the React, Preact and Vue components render elements.
 - **Works with `ux:icons:lock`**: write the import first, run `ux:icons:lock`, the icon is downloaded and dumped.
 

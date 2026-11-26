@@ -51,18 +51,17 @@ export function UXIcon({ icon, className, ...props }: UXIconProps): JSX.Element 
 }
 
 /**
- * Renders an icon by a name known only at runtime, loading that icon alone, like {@link UXIcon} once loaded.
+ * Loads an icon by a name known only at runtime: null while it loads, for an unknown name, or if it fails to load.
  *
  *     import { loaders } from '../var/icons/loaders.js';
  *
- *     <UXLazyIcon name={data.icon} loaders={loaders} fallback={<Spinner />} />
+ *     const icon = useIcon(loaders, data.icon);
+ *     return icon ? <UXIcon icon={icon} /> : <Spinner />;
  */
-export function UXLazyIcon<Name extends string>({
-    name,
-    loaders,
-    fallback = null,
-    ...props
-}: UXLazyIconProps<Name>): JSX.Element {
+export function useIcon<Name extends string>(
+    loaders: UXIconLoaders<Name>,
+    name: UXIconName<Name> | null | undefined
+): UXIconData<Name> | null {
     // an icon loaded earlier renders at once, without a fallback flash
     const [icon, setIcon] = useState(() => getLoadedIcon(loaders, name))
 
@@ -78,7 +77,25 @@ export function UXLazyIcon<Name extends string>({
         }
     }, [loaders, name])
 
-    // until the effect runs, the state may still hold the icon of the previous name;
+    // until the effect runs, the state may still hold the icon of the previous name
+    return icon !== null && icon.name === name ? icon : getLoadedIcon(loaders, name)
+}
+
+/**
+ * Renders an icon by a name known only at runtime, loading that icon alone, like {@link UXIcon} once loaded.
+ *
+ *     import { loaders } from '../var/icons/loaders.js';
+ *
+ *     <UXLazyIcon name={data.icon} loaders={loaders} fallback={<Spinner />} />
+ */
+export function UXLazyIcon<Name extends string>({
+    name,
+    loaders,
+    fallback = null,
+    ...props
+}: UXLazyIconProps<Name>): JSX.Element {
+    const icon = useIcon(loaders, name)
+
     // the fallback is wrapped as Preact < 10.25 types a component as returning a VNode or null
-    return icon !== null && icon.name === name ? h(UXIcon, { ...props, icon }) : h(Fragment, null, fallback)
+    return icon !== null ? h(UXIcon, { ...props, icon }) : h(Fragment, null, fallback)
 }

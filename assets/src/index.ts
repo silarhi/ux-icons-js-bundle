@@ -377,6 +377,20 @@ export async function loadIcon<Name extends string>(
 }
 
 /**
+ * Loads several icons at once, e.g. the icons of a menu before it opens, so that they render without a fallback.
+ *
+ *     await preloadIcons(loaders, items.map((item) => item.icon));
+ *
+ * Resolves to the icons in the same order, null for an unknown name; rejects if a module fails to load.
+ */
+export function preloadIcons<Name extends string>(
+    loaders: UXIconLoaders<Name>,
+    names: Iterable<UXIconName<Name> | null | undefined>
+): Promise<(UXIconData<Name> | null)[]> {
+    return Promise.all(Array.from(names, (name) => loadIcon(loaders, name)))
+}
+
+/**
  * Returns an icon already loaded by {@link loadIcon}, synchronously, or null.
  *
  * Framework adapters use it to render a loaded icon without waiting for a promise.

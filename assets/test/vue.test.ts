@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 import { createApp, h, nextTick, ref } from 'vue'
 import type { UXIconData, UXIconLoaders } from '../src/index'
-import { UXIcon, UXLazyIcon } from '../src/vue'
+import { UXIcon, UXLazyIcon, useIcon } from '../src/vue'
 
 const icon: UXIconData = {
     name: 'lucide:trash-2',
@@ -135,5 +135,75 @@ describe('UXLazyIcon', () => {
         await flush()
 
         expect(container.querySelector('path')?.getAttribute('d')).toBe('M0 0')
+    })
+})
+
+describe('useIcon', () => {
+    const flush = async (): Promise<void> => {
+        await new Promise((resolve) => setTimeout(resolve))
+        await nextTick()
+    }
+
+    test.each([
+        ['a ref', (name: ReturnType<typeof ref<string | null>>) => name],
+        ['a getter', (name: ReturnType<typeof ref<string | null>>) => () => name.value],
+    ])('follows a name given as %s', async (_, source) => {
+        const other = { ...icon, name: 'lucide:x' } satisfies UXIconData
+        const loaders = {
+            'lucide:trash-2': () => Promise.resolve({ default: icon }),
+            'lucide:x': () => Promise.resolve({ default: other }),
+        }
+        const name = ref<string | null>('lucide:trash-2')
+        let loaded: ReturnType<typeof useIcon> | undefined
+        createApp({
+            setup() {
+                // biome-ignore lint/correctness/useHookAtTopLevel: a Vue composable, called in setup()
+                loaded = useIcon(loaders, source(name))
+
+                return () => null
+            },
+        }).mount(document.createElement('div'))
+
+        expect(loaded?.value).toBeNull()
+        await flush()
+        expect(loaded?.value).toBe(icon)
+
+        name.value = 'lucide:x'
+        await flush()
+        expect(loaded?.value).toBe(other)
+
+        name.value = null
+        await flush()
+        expect(loaded?.value).toBeNull()
+    })
+
+    test('accepts a plain name', async () => {
+        let loaded: ReturnType<typeof useIcon> | undefined
+        createApp({
+            setup() {
+                // biome-ignore lint/correctness/useHookAtTopLevel: a Vue composable, called in setup()
+                loaded = useIcon({ 'lucide:trash-2': () => Promise.resolve({ default: icon }) }, 'lucide:trash-2')
+
+                return () => null
+            },
+        }).mount(document.createElement('div'))
+
+        await flush()
+        expect(loaded?.value).toBe(icon)
+    })
+
+    test('resets the icon when it fails to load', async () => {
+        let loaded: ReturnType<typeof useIcon> | undefined
+        createApp({
+            setup() {
+                // biome-ignore lint/correctness/useHookAtTopLevel: a Vue composable, called in setup()
+                loaded = useIcon({ 'lucide:trash-2': () => Promise.reject(new Error('network')) }, 'lucide:trash-2')
+
+                return () => null
+            },
+        }).mount(document.createElement('div'))
+
+        await flush()
+        expect(loaded?.value).toBeNull()
     })
 })

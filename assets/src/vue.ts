@@ -6,7 +6,9 @@ import {
     h,
     type PropType,
     type PublicProps,
+    type Ref,
     shallowRef,
+    unref,
     type VNode,
     watch,
 } from 'vue'
@@ -18,6 +20,7 @@ import {
     splitAttributes,
     type UXIconData,
     type UXIconLoaders,
+    type UXIconName,
 } from './index'
 
 // biome-ignore lint/complexity/noBannedTypes: "{}" is the default of the DefineComponent type parameters
@@ -88,43 +91,73 @@ const uxIcon = defineComponent({
  */
 export const UXIcon: UXComponent<typeof uxIconProps, () => VNode> = uxIcon
 
+type UXIconSource<T> = T | Readonly<Ref<T>> | (() => T)
+
+/**
+ * Loads an icon by a name known only at runtime: null while it loads, for an unknown name, or if it fails to load.
+ *
+ * The name (and the loaders) can be a value, a ref or a getter: the icon follows it.
+ *
+ *     <script setup>
+ *     import { useIcon, UXIcon } from '@silarhi/ux-icons-js/vue';
+ *     import { loaders } from '../var/icons/loaders.js';
+ *
+ *     const props = defineProps(['icon']);
+ *     const icon = useIcon(loaders, () => props.icon);
+ *     </script>
+ *
+ *     <UXIcon v-if="icon" :icon="icon" />
+ */
+export function useIcon<Name extends string>(
+    loaders: UXIconSource<UXIconLoaders<Name>>,
+    name: UXIconSource<UXIconName<Name> | null | undefined>
+): Readonly<Ref<UXIconData<Name> | null>> {
+    const icon = shallowRef<UXIconData<Name> | null>(null)
+    // "toValue()" needs Vue 3.3
+    const read = <T>(source: UXIconSource<T>): T =>
+        typeof source === 'function' ? (source as () => T)() : unref(source as T | Ref<T>)
+
+    watch(
+        () => [read(loaders), read(name)] as const,
+        ([loaders, name], _, onCleanup) => {
+            let active = true
+            onCleanup(() => {
+                active = false
+            })
+
+            // an icon loaded earlier renders at once, without a fallback flash
+            icon.value = getLoadedIcon(loaders, name)
+            loadIcon(loaders, name).then(
+                (loaded) => {
+                    if (active) {
+                        icon.value = loaded
+                    }
+                },
+                () => {
+                    if (active) {
+                        icon.value = null
+                    }
+                }
+            )
+        },
+        { immediate: true }
+    )
+
+    return icon
+}
+
 const uxLazyIcon = defineComponent({
     name: 'UXLazyIcon',
     inheritAttrs: false,
     props: uxLazyIconProps,
     setup(props, { attrs, slots }) {
-        const loaded = shallowRef<UXIconData | null>(null)
-
-        watch(
-            () => [props.loaders, props.name] as const,
-            ([loaders, name], _, onCleanup) => {
-                let active = true
-                onCleanup(() => {
-                    active = false
-                })
-
-                // an icon loaded earlier renders at once, without a fallback flash
-                loaded.value = getLoadedIcon(loaders, name)
-                loadIcon(loaders, name).then(
-                    (icon) => {
-                        if (active) {
-                            loaded.value = icon
-                        }
-                    },
-                    () => {
-                        if (active) {
-                            loaded.value = null
-                        }
-                    }
-                )
-            },
-            { immediate: true }
+        // biome-ignore lint/correctness/useHookAtTopLevel: a Vue composable, called in setup()
+        const icon = useIcon(
+            () => props.loaders,
+            () => props.name
         )
 
-        return () =>
-            loaded.value !== null && loaded.value.name === props.name
-                ? h(uxIcon, { ...attrs, icon: loaded.value })
-                : (slots.fallback?.() ?? null)
+        return () => (icon.value !== null ? h(uxIcon, { ...attrs, icon: icon.value }) : (slots.fallback?.() ?? null))
     },
 })
 
