@@ -20,18 +20,21 @@ import {
     type UXIconLoaders,
 } from './index'
 
+// biome-ignore lint/complexity/noBannedTypes: "{}" is the default of the DefineComponent type parameters
+type Empty = {}
+
 // isolatedDeclarations needs the exported components' types spelled out: they are written from these props objects,
 // and each component is defined apart from its export so that the annotation does not change how defineComponent
 // infers its props
-type UXComponent<Props, Render, Defaults = {}> = DefineComponent<
+type UXComponent<Props, Render, Defaults = Empty> = DefineComponent<
     ExtractPropTypes<Props>,
     Render,
-    {},
-    {},
-    {},
+    Empty,
+    Empty,
+    Empty,
     ComponentOptionsMixin,
     ComponentOptionsMixin,
-    {},
+    Empty,
     string,
     PublicProps,
     Readonly<ExtractPropTypes<Props>>,
