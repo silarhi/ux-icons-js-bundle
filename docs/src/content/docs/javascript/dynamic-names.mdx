@@ -86,6 +86,19 @@ interface Status {
 }
 ```
 
+The names are typed from the loaders: your editor suggests the dumped names for `loadIcon()` and the `name` of
+`UXLazyIcon`, and `loadIcon()` resolves to a `UXIconData<IconName>`. Any other string is still accepted, as a
+name from an API is only known at runtime. `hasIcon()` narrows a string to `IconName`:
+
+```ts
+const name: string = data.icon
+if (hasIcon(loaders, name)) {
+    // name: IconName
+}
+```
+
+This needs TypeScript 5.4 or later (`NoInfer`).
+
 ## Only local icons
 
 Like the named exports, the loaders only know the dumped, local icons. `ux:icons:lock` cannot guess the names an API

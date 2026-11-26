@@ -17,6 +17,11 @@ same git tag; the npm package version follows that tag.
 - The `icons` option dumps only the matching icons (`lucide:*`, `!lucide:*-off`), the `dump_loaders` option skips
   `loaders.js` and the icon modules.
 
+### Changed
+
+- `loadIcon()`, `getLoadedIcon()` and `UXLazyIcon` type the names from the loaders: editors suggest the
+  dumped names, any other string is still accepted. The types need TypeScript 5.4+.
+
 ## [0.3.1] - 2026-10-23
 
 ### Changed
