@@ -8,7 +8,7 @@ same git tag; the npm package version follows that tag.
 
 ## [Unreleased]
 
-## [0.4.0] - Unreleased
+## [0.4.0] - 2026-11-26
 
 ### Added
 
@@ -29,6 +29,14 @@ same git tag; the npm package version follows that tag.
   dumped names, any other string is still accepted. The types need TypeScript 5.4+.
 - `scan_directories` also scans `templates/` by default, and `.html` and `.twig` files.
 - React and Preact `UXLazyIcon` render an icon loaded earlier at once when their `name` changes.
+
+## [0.3.2] - 2026-10-29
+
+### Changed
+
+- No change to the library code: dependency updates, and `composer.json` links the documentation site.
+- The npm package is published by a hardened workflow: build and publish in separate jobs, actions pinned by SHA,
+  release tags must be on `main`.
 
 ## [0.3.1] - 2026-10-23
 
@@ -86,7 +94,8 @@ same git tag; the npm package version follows that tag.
   `null` when it is set again, so `renderIcon()` output is byte for byte identical to `ux_icon()`.
 
 [Unreleased]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.4.0...HEAD
-[0.4.0]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.3.1...v0.4.0
+[0.4.0]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.3.2...v0.4.0
+[0.3.2]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.1.2...v0.2.0
