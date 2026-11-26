@@ -17,7 +17,10 @@ Remote icons are not dumped: [import or lock them](/php/remote-icons/) first.
 
 - **On cache warmup**: `cache:clear`, `cache:warmup`, and in `dev` every time the container is rebuilt. The cache
   warmer is not optional: the dump directory exists as soon as the container is built, as AssetMapper requires.
-- **With the command**, e.g. after adding an SVG file by hand:
+- **In `dev`, when an SVG file changes**: the icon directory and the icon set paths are tracked like the translation
+  directories, so adding, changing or removing an SVG file rebuilds the container on the next request, which dumps the
+  icons again. Only the changed files are rewritten, so your bundler rebuilds that icon alone.
+- **With the command**, e.g. from a script or when no request is made:
 
     ```console
     $ php bin/console ux-icons-js:dump

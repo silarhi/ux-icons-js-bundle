@@ -22,6 +22,8 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  *
  * The values are copied from the internal UXIconsBundle services, once its extension has resolved them: the icon renderer (default, icon set and suffix attributes, aliases) and the local registry (icon directory, icon set paths).
  *
+ * The icon directories are tracked as container resources, like FrameworkBundle tracks the translation directories: in debug, adding, changing or removing an SVG file rebuilds the container, and the cache warmer dumps the icons again.
+ *
  * @internal
  */
 final class UxIconsConfigurationPass implements CompilerPassInterface
@@ -51,5 +53,14 @@ final class UxIconsConfigurationPass implements CompilerPassInterface
             ->setArgument(2, $registry->getArgument(2))
             ->setArgument(3, $renderer->getArgument(2))
         ;
+
+        /** @var string $iconDir */
+        $iconDir = $container->getParameterBag()->resolveValue($registry->getArgument(1));
+        /** @var array<string, string> $iconSetPaths */
+        $iconSetPaths = $container->getParameterBag()->resolveValue($registry->getArgument(2));
+        foreach ([$iconDir, ...array_values($iconSetPaths)] as $directory) {
+            // a missing directory is tracked too: creating it rebuilds the container
+            $container->fileExists($directory, '/\.svg$/');
+        }
     }
 }
