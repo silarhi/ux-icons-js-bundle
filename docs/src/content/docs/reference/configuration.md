@@ -16,6 +16,12 @@ silarhi_ux_icons_js:
     # Whether TypeScript types are dumped alongside the icons
     dump_typescript: true
 
+    # Whether "loaders.js" and one module per icon are dumped, to load an icon by its name
+    dump_loaders: true
+
+    # The icons to dump, all by default: "*" is a wildcard, "!" excludes
+    icons: []
+
     # The directories scanned for icons imported in JavaScript files (see "ux:icons:lock")
     scan_directories: ['%kernel.project_dir%/assets']
 
@@ -25,11 +31,13 @@ when@prod:
         dump_typescript: false
 ```
 
-| Option             | Default                           | Description                                                                                                                                |
-| ------------------ | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `dump_directory`   | `%kernel.project_dir%/var/icons`  | Where `index.js`, `loaders.js`, the icon modules and their types are dumped. Mapped as `var/icons` with [AssetMapper](/php/asset-mapper/). |
-| `dump_typescript`  | `true`                            | Dumps `index.d.ts` and `loaders.d.ts`. When `false`, previously dumped ones are removed.                                                   |
-| `scan_directories` | `['%kernel.project_dir%/assets']` | Scanned by [`ux:icons:lock`](/php/remote-icons/#uxiconslock) for the icons imported in JavaScript.                                         |
+| Option             | Default                           | Description                                                                                                                                                       |
+| ------------------ | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dump_directory`   | `%kernel.project_dir%/var/icons`  | Where `index.js`, `loaders.js`, the icon modules and their types are dumped. Mapped as `var/icons` with [AssetMapper](/php/asset-mapper/).                        |
+| `dump_typescript`  | `true`                            | Dumps `index.d.ts` and `loaders.d.ts`. When `false`, previously dumped ones are removed.                                                                          |
+| `dump_loaders`     | `true`                            | Dumps `loaders.js`, `loaders.d.ts` and the icon modules, to [load an icon by name](/javascript/dynamic-names/). When `false`, previously dumped ones are removed. |
+| `icons`            | `[]` (all)                        | The icons to dump, see [filtering](/php/dumping/#filtering-the-icons).                                                                                            |
+| `scan_directories` | `['%kernel.project_dir%/assets']` | Scanned by [`ux:icons:lock`](/php/remote-icons/#uxiconslock) for the icons imported in JavaScript.                                                                |
 
 ## Reused `ux_icons` options
 

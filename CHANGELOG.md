@@ -14,6 +14,8 @@ same git tag; the npm package version follows that tag.
 
 - In `dev`, adding, changing or removing an SVG file of the icon directory or of an icon set `path` dumps the icons
   again: the directories are tracked by the container, like the translation directories.
+- The `icons` option dumps only the matching icons (`lucide:*`, `!lucide:*-off`), the `dump_loaders` option skips
+  `loaders.js` and the icon modules.
 
 ## [0.3.1] - 2026-10-23
 

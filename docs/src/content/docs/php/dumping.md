@@ -33,6 +33,24 @@ Remote icons are not dumped: [import or lock them](/php/remote-icons/) first.
 
 Dumping only reads local files: it never downloads an icon, even with `ux_icons.iconify.on_demand`.
 
+## Filtering the icons
+
+When an icon set `path` holds a whole icon set, dumping thousands of icons makes `loaders.js` large, and fills the
+dump directory with their modules. The `icons` option keeps only the matching names, like the `keys_patterns` of
+`symfony/ux-translator`:
+
+```yaml
+# config/packages/silarhi_ux_icons_js.yaml
+silarhi_ux_icons_js:
+    icons:
+        - 'lucide:*' # "*" matches any characters
+        - 'app:*'
+        - '!lucide:*-off' # "!" excludes
+```
+
+An icon is dumped if it matches one of the included patterns (any icon when there are none) and none of the excluded
+ones. Aliases are matched by their own name. An icon left out cannot be imported nor loaded by its name.
+
 ## Configured attributes
 
 Each icon is dumped with its attributes already resolved, exactly as `ux_icon()` resolves them:

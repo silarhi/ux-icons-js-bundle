@@ -91,3 +91,6 @@ interface Status {
 Like the named exports, the loaders only know the dumped, local icons. `ux:icons:lock` cannot guess the names an API
 returns: download them first with `ux:icons:import` (see [remote icons](/php/remote-icons/)), or keep them in your icon
 directory.
+
+An application that never loads an icon by its name can skip `loaders.js` and the icon modules with
+[`dump_loaders: false`](/reference/configuration/).
