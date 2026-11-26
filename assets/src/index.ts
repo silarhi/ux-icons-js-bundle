@@ -297,6 +297,13 @@ export type UXIconLoader<Name extends string = string> = () => Promise<{ readonl
  */
 export type UXIconLoaders<Name extends string = string> = Readonly<Record<Name, UXIconLoader<Name>>>
 
+/**
+ * An icon name of the loaders, or any other string (e.g. from an API response): editors still suggest the known names.
+ *
+ * "NoInfer" keeps the icon names from the loaders, a literal given as name does not widen them.
+ */
+export type UXIconName<Name extends string> = NoInfer<Name> | (string & {})
+
 const loadedIcons = new WeakMap<UXIconLoaders, Map<string, UXIconData>>()
 const pendingIcons = new WeakMap<UXIconLoaders, Map<string, Promise<UXIconData>>>()
 
@@ -311,6 +318,20 @@ function cacheOf<T>(caches: WeakMap<UXIconLoaders, Map<string, T>>, loaders: UXI
 }
 
 /**
+ * Whether the dump knows an icon name (a local icon or an alias), without loading it.
+ *
+ *     if (hasIcon(loaders, data.icon)) {
+ *         // data.icon is typed as one of the dumped names
+ *     }
+ */
+export function hasIcon<Name extends string>(
+    loaders: UXIconLoaders<Name>,
+    name: string | null | undefined
+): name is Name {
+    return name !== null && name !== undefined && Object.hasOwn(loaders, name)
+}
+
+/**
  * Loads an icon by its name, known only at runtime (e.g. from an API response), from the dumped loaders.
  *
  *     import { loaders } from '../var/icons/loaders.js';
@@ -320,14 +341,17 @@ function cacheOf<T>(caches: WeakMap<UXIconLoaders, Map<string, T>>, loaders: UXI
  * Resolves to null for a name the dump does not know (not a local icon), and rejects if the module fails to load.
  * Each icon is loaded once: later calls resolve from the cache.
  */
-export async function loadIcon(loaders: UXIconLoaders, name: string | null | undefined): Promise<UXIconData | null> {
-    if (name === null || name === undefined || !Object.hasOwn(loaders, name)) {
+export async function loadIcon<Name extends string>(
+    loaders: UXIconLoaders<Name>,
+    name: UXIconName<Name> | null | undefined
+): Promise<UXIconData<Name> | null> {
+    if (!hasIcon(loaders, name)) {
         return null
     }
 
     const loaded = cacheOf(loadedIcons, loaders).get(name)
     if (loaded !== undefined) {
-        return loaded
+        return loaded as UXIconData<Name>
     }
 
     const pending = cacheOf(pendingIcons, loaders)
@@ -349,7 +373,21 @@ export async function loadIcon(loaders: UXIconLoaders, name: string | null | und
         pending.set(name, promise)
     }
 
-    return promise
+    return promise as Promise<UXIconData<Name>>
+}
+
+/**
+ * Loads several icons at once, e.g. the icons of a menu before it opens, so that they render without a fallback.
+ *
+ *     await preloadIcons(loaders, items.map((item) => item.icon));
+ *
+ * Resolves to the icons in the same order, null for an unknown name; rejects if a module fails to load.
+ */
+export function preloadIcons<Name extends string>(
+    loaders: UXIconLoaders<Name>,
+    names: Iterable<UXIconName<Name> | null | undefined>
+): Promise<(UXIconData<Name> | null)[]> {
+    return Promise.all(Array.from(names, (name) => loadIcon(loaders, name)))
 }
 
 /**
@@ -357,6 +395,11 @@ export async function loadIcon(loaders: UXIconLoaders, name: string | null | und
  *
  * Framework adapters use it to render a loaded icon without waiting for a promise.
  */
-export function getLoadedIcon(loaders: UXIconLoaders, name: string | null | undefined): UXIconData | null {
-    return name === null || name === undefined ? null : (loadedIcons.get(loaders)?.get(name) ?? null)
+export function getLoadedIcon<Name extends string>(
+    loaders: UXIconLoaders<Name>,
+    name: UXIconName<Name> | null | undefined
+): UXIconData<Name> | null {
+    return name === null || name === undefined
+        ? null
+        : ((loadedIcons.get(loaders)?.get(name) as UXIconData<Name> | undefined) ?? null)
 }

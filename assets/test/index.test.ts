@@ -1,5 +1,15 @@
 import { describe, expect, test, vi } from 'vitest'
-import { createIconElement, getLoadedIcon, loadIcon, renderIcon, resolveIcon, type UXIconData } from '../src/index'
+import {
+    createIconElement,
+    getLoadedIcon,
+    hasIcon,
+    loadIcon,
+    preloadIcons,
+    renderIcon,
+    resolveIcon,
+    type UXIconData,
+    type UXIconLoaders,
+} from '../src/index'
 
 const icon: UXIconData<'lucide:trash-2'> = {
     name: 'lucide:trash-2',
@@ -198,5 +208,42 @@ describe('loadIcon', () => {
         await expect(loadIcon(loaders, 'lucide:trash-2')).rejects.toThrow('network')
         expect(await loadIcon(loaders, 'lucide:trash-2')).toBe(icon)
         expect(flaky).toHaveBeenCalledTimes(2)
+    })
+
+    test.each([
+        ['lucide:trash-2', true],
+        ['lucide:missing', false],
+        ['toString', false],
+        [null, false],
+        [undefined, false],
+    ])('hasIcon(%s) is %s', (name, expected) => {
+        expect(hasIcon({ 'lucide:trash-2': loader(icon) }, name)).toBe(expected)
+    })
+
+    test('preloads several icons at once', async () => {
+        const trash = loader(icon)
+        const loaders = { 'lucide:trash-2': trash }
+
+        expect(await preloadIcons(loaders, ['lucide:trash-2', 'lucide:missing', null, 'lucide:trash-2'])).toEqual([
+            icon,
+            null,
+            null,
+            icon,
+        ])
+        expect(getLoadedIcon(loaders, 'lucide:trash-2')).toBe(icon)
+        expect(trash).toHaveBeenCalledOnce()
+    })
+
+    test('icon names are typed from the loaders', async () => {
+        const loaders: UXIconLoaders<'lucide:trash-2'> = { 'lucide:trash-2': () => Promise.resolve({ default: icon }) }
+        const name: string = 'lucide:trash-2'
+
+        const loaded: UXIconData<'lucide:trash-2'> | null = await loadIcon(loaders, 'lucide:trash-2')
+        // any string is accepted, e.g. from an API response
+        expect(await loadIcon(loaders, name)).toBe(loaded)
+        if (hasIcon(loaders, name)) {
+            const known: 'lucide:trash-2' = name
+            expect(known).toBe('lucide:trash-2')
+        }
     })
 })

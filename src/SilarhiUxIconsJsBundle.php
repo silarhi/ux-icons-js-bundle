@@ -62,9 +62,18 @@ final class SilarhiUxIconsJsBundle extends AbstractBundle
                     ->info('Whether TypeScript types are dumped alongside the icons. Disable this if you do not use TypeScript (e.g. in production when using AssetMapper).')
                     ->defaultTrue()
                 ->end()
+                ->booleanNode('dump_loaders')
+                    ->info('Whether "loaders.js" and one module per icon are dumped, to load an icon by a name known only at runtime ("loadIcon()", "UXLazyIcon", "<ux-icon>"). Disable this if you only import the icons by their export name.')
+                    ->defaultTrue()
+                ->end()
+                ->arrayNode('icons')
+                    ->info('The icons to dump, all by default. Supports wildcards (e.g. "lucide:*"), prefix with a "!" to exclude (e.g. "!lucide:*-off").')
+                    ->beforeNormalization()->castToArray()->end()
+                    ->scalarPrototype()->cannotBeEmpty()->end()
+                ->end()
                 ->arrayNode('scan_directories')
-                    ->info('The directories scanned for icons imported in JavaScript files (see "ux:icons:lock").')
-                    ->defaultValue(['%kernel.project_dir%/assets'])
+                    ->info('The directories scanned for the icons imported in JavaScript files, and used by "<ux-icon>" elements (see "ux:icons:lock").')
+                    ->defaultValue(['%kernel.project_dir%/assets', '%kernel.project_dir%/templates'])
                     ->scalarPrototype()->end()
                 ->end()
             ->end();
@@ -96,7 +105,7 @@ final class SilarhiUxIconsJsBundle extends AbstractBundle
     #[Override]
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
-        /** @var array{dump_directory: string, dump_typescript: bool, scan_directories: list<string>} $config */
+        /** @var array{dump_directory: string, dump_typescript: bool, dump_loaders: bool, icons: list<string>, scan_directories: list<string>} $config */
         $services = $container->services();
 
         // Local icons only: dumping must never trigger an on-demand download
@@ -117,6 +126,8 @@ final class SilarhiUxIconsJsBundle extends AbstractBundle
                 new AbstractArgument('icon_aliases'),
                 $config['dump_directory'],
                 $config['dump_typescript'],
+                $config['icons'],
+                $config['dump_loaders'],
             ]);
         $services->alias(IconsDumper::class, 'silarhi_ux_icons_js.dumper');
 

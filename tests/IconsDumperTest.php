@@ -148,6 +148,46 @@ final class IconsDumperTest extends TestCase
         self::assertFileDoesNotExist($this->dumpDir . '/loaders.d.ts');
     }
 
+    /**
+     * @param list<string> $patterns
+     * @param list<string> $expected
+     */
+    #[DataProvider('providePatterns')]
+    public function testDumpTheIconsMatchingThePatterns(array $patterns, array $expected): void
+    {
+        $dumper = $this->createDumper(iconSetPaths: ['img' => self::FIXTURES . '/images'], aliases: ['me' => 'user'], patterns: $patterns);
+
+        self::assertSame($expected, $dumper->dump());
+        self::assertSame($expected, $dumper->iconNames());
+    }
+
+    /**
+     * @return iterable<string, array{list<string>, list<string>}>
+     */
+    public static function providePatterns(): iterable
+    {
+        yield 'all' => [[], ['a:icon', 'img:a:b:icon', 'img:a:icon', 'img:ab:icon', 'img:icon', 'me', 'sub:check', 'user']];
+        yield 'included' => [['img:*', 'user'], ['img:a:b:icon', 'img:a:icon', 'img:ab:icon', 'img:icon', 'user']];
+        yield 'excluded' => [['!img:*', '!me'], ['a:icon', 'sub:check', 'user']];
+        yield 'included and excluded' => [['img:*', '!img:a:*'], ['img:ab:icon', 'img:icon']];
+        yield 'wildcard in the middle' => [['img:*:icon'], ['img:a:b:icon', 'img:a:icon', 'img:ab:icon']];
+        yield 'regex characters are literal' => [['img:a.icon', ' ', '!'], []];
+    }
+
+    public function testDumpWithoutLoaders(): void
+    {
+        $this->createDumper()->dump();
+        self::assertFileExists($this->dumpDir . '/icons/user.js');
+
+        $this->createDumper(dumpLoaders: false)->dump();
+
+        self::assertFileExists($this->dumpDir . '/index.js');
+        self::assertFileExists($this->dumpDir . '/index.d.ts');
+        self::assertFileDoesNotExist($this->dumpDir . '/loaders.js');
+        self::assertFileDoesNotExist($this->dumpDir . '/loaders.d.ts');
+        self::assertDirectoryDoesNotExist($this->dumpDir . '/icons');
+    }
+
     public function testDumpThrowsOnExportNameCollision(): void
     {
         $dumper = $this->createDumper(aliases: ['sub-check' => 'user']);
@@ -244,12 +284,13 @@ final class IconsDumperTest extends TestCase
      * @param array<string, array<string, string>> $setAttributes
      * @param array<string, string>                $iconSetPaths
      * @param array<array-key, string>             $aliases
+     * @param list<string>                         $patterns
      */
-    private function createDumper(array $defaultAttributes = [], array $setAttributes = [], array $iconSetPaths = [], array $aliases = [], bool $dumpTypeScript = true): IconsDumper
+    private function createDumper(array $defaultAttributes = [], array $setAttributes = [], array $iconSetPaths = [], array $aliases = [], bool $dumpTypeScript = true, array $patterns = [], bool $dumpLoaders = true): IconsDumper
     {
         $registry = new LocalSvgIconRegistry(new IconFactory(), self::FIXTURES . '/icons', $iconSetPaths);
         $resolver = new IconResolver($registry, $defaultAttributes, $aliases, $setAttributes);
 
-        return new IconsDumper($resolver, self::FIXTURES . '/icons', $iconSetPaths, $aliases, $this->dumpDir, $dumpTypeScript);
+        return new IconsDumper($resolver, self::FIXTURES . '/icons', $iconSetPaths, $aliases, $this->dumpDir, $dumpTypeScript, $patterns, $dumpLoaders);
     }
 }

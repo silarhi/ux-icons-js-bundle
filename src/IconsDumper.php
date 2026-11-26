@@ -83,6 +83,8 @@ final readonly class IconsDumper
     /**
      * @param array<string, string>    $iconSetPaths
      * @param array<array-key, string> $aliases
+     * @param list<string>             $patterns     the icon names to dump, e.g. "lucide:*", "!lucide:*-off" excludes (all icons when empty)
+     * @param bool                     $dumpLoaders  whether "loaders.js" and one module per icon are dumped, for the icons loaded by name
      */
     public function __construct(
         private IconResolver $resolver,
@@ -91,6 +93,8 @@ final readonly class IconsDumper
         private array $aliases,
         private string $dumpDir,
         private bool $dumpTypeScript = true,
+        private array $patterns = [],
+        private bool $dumpLoaders = true,
         private Filesystem $filesystem = new Filesystem(),
     ) {
     }
@@ -130,19 +134,24 @@ final readonly class IconsDumper
             . sprintf("export type IconName = %s;\n", [] === $names ? 'never' : implode(' | ', $names))
             . "export declare const loaders: UXIconLoaders<IconName>;\n";
 
-        $this->write('index.js', $js);
-        $this->write('loaders.js', $loaders);
-        foreach ($lazyFiles as $lazyFile => $content) {
-            $this->write($lazyFile, $content);
+        $files = ['index.js' => $js, 'index.d.ts' => $dts];
+        if ($this->dumpLoaders) {
+            $files += ['loaders.js' => $loaders, 'loaders.d.ts' => $loadersDts, ...$lazyFiles];
         }
-        $this->removeStaleLazyFiles(array_keys($lazyFiles));
+        if (!$this->dumpTypeScript) {
+            unset($files['index.d.ts'], $files['loaders.d.ts']);
+        }
 
-        if ($this->dumpTypeScript) {
-            $this->write('index.d.ts', $dts);
-            $this->write('loaders.d.ts', $loadersDts);
-        } else {
-            $this->filesystem->remove([$this->dumpDir . '/index.d.ts', $this->dumpDir . '/loaders.d.ts']);
+        foreach ($files as $file => $content) {
+            $this->write($file, $content);
         }
+
+        // the files of a previous dump with other options, and the modules of removed icons
+        $this->filesystem->remove(array_map(
+            fn (string $file): string => $this->dumpDir . '/' . $file,
+            [...array_diff(['index.d.ts', 'loaders.js', 'loaders.d.ts'], array_keys($files)), ...($this->dumpLoaders ? [] : [self::LAZY_DIRECTORY])],
+        ));
+        $this->removeStaleLazyFiles(array_keys($lazyFiles));
 
         return array_column(array_values($exports), 0);
     }
@@ -344,7 +353,52 @@ final readonly class IconsDumper
         // numeric aliases (e.g. "500") are integer keys
         $names = [...$names, ...array_map(strval(...), array_keys($this->aliases))];
 
-        return array_values(array_filter(array_unique($names), Icon::isValidName(...)));
+        $names = array_filter(array_unique($names), Icon::isValidName(...));
+
+        return array_values($this->filter($names));
+    }
+
+    /**
+     * Keeps the names matching the patterns, like the "keys_patterns" of symfony/ux-translator.
+     *
+     * "*" matches any characters, a "!" prefix excludes; with only exclusions, every other icon is kept.
+     *
+     * @param array<string> $names
+     *
+     * @return array<string>
+     */
+    private function filter(array $names): array
+    {
+        $included = $excluded = [];
+        foreach ($this->patterns as $pattern) {
+            $pattern = trim($pattern);
+            if (str_starts_with($pattern, '!')) {
+                $excluded[] = substr($pattern, 1);
+            } elseif ('' !== $pattern) {
+                $included[] = $pattern;
+            }
+        }
+
+        $includeRegex = self::patternRegex($included);
+        $excludeRegex = self::patternRegex($excluded);
+
+        return array_filter($names, static fn (string $name): bool => (null === $includeRegex || 1 === preg_match($includeRegex, $name))
+            && (null === $excludeRegex || 1 !== preg_match($excludeRegex, $name)));
+    }
+
+    /**
+     * @param list<string> $patterns
+     */
+    private static function patternRegex(array $patterns): ?string
+    {
+        $patterns = array_filter($patterns, static fn (string $pattern): bool => '' !== $pattern);
+        if ([] === $patterns) {
+            return null;
+        }
+
+        $patterns = array_map(static fn (string $pattern): string => str_replace('\\*', '.*', preg_quote($pattern, '/')), $patterns);
+
+        return '/^(?:' . implode('|', $patterns) . ')$/';
     }
 
     /**

@@ -8,6 +8,28 @@ same git tag; the npm package version follows that tag.
 
 ## [Unreleased]
 
+## [0.4.0] - Unreleased
+
+### Added
+
+- In `dev`, adding, changing or removing an SVG file of the icon directory or of an icon set `path` dumps the icons
+  again: the directories are tracked by the container, like the translation directories.
+- `@silarhi/ux-icons-js/element`: `defineIconElement(loaders)` registers a `<ux-icon name="…">` custom element, a
+  placeholder replaced by the `<svg>` of `ux_icon()` once its icon is loaded, for Twig templates, Turbo Streams and
+  Stimulus controllers. `ux:icons:lock` finds the names of these elements.
+- `useIcon(loaders, name)`: a React and Preact hook, and a Vue composable, returning an icon loaded by its name.
+- `preloadIcons(loaders, names)` loads several icons at once, `hasIcon(loaders, name)` tells whether the dump knows a
+  name.
+- The `icons` option dumps only the matching icons (`lucide:*`, `!lucide:*-off`), the `dump_loaders` option skips
+  `loaders.js` and the icon modules.
+
+### Changed
+
+- `loadIcon()`, `getLoadedIcon()`, `useIcon()` and `UXLazyIcon` type the names from the loaders: editors suggest the
+  dumped names, any other string is still accepted. The types need TypeScript 5.4+.
+- `scan_directories` also scans `templates/` by default, and `.html` and `.twig` files.
+- React and Preact `UXLazyIcon` render an icon loaded earlier at once when their `name` changes.
+
 ## [0.3.1] - 2026-10-23
 
 ### Changed
@@ -63,7 +85,8 @@ same git tag; the npm package version follows that tag.
 - Compared with symfony/ux#4072, `resolveIcon()` keeps the position of an attribute dumped as `false` or given as
   `null` when it is set again, so `renderIcon()` output is byte for byte identical to `ux_icon()`.
 
-[Unreleased]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.1.2...v0.2.0

@@ -11,7 +11,8 @@
         "svg",
         "react",
         "preact",
-        "vue"
+        "vue",
+        "web-components"
     ],
     "repository": {
         "type": "git",
@@ -32,6 +33,10 @@
         "./react": {
             "types": "./dist/react.d.mts",
             "import": "./dist/react.mjs"
+        },
+        "./element": {
+            "types": "./dist/element.d.mts",
+            "import": "./dist/element.mjs"
         },
         "./preact": {
             "types": "./dist/preact.d.mts",

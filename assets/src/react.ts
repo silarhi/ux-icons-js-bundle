@@ -15,6 +15,7 @@ import {
     splitAttributes,
     type UXIconData,
     type UXIconLoaders,
+    type UXIconName,
 } from './index'
 
 type SVGIconProps = Omit<SVGProps<SVGSVGElement>, 'dangerouslySetInnerHTML' | 'children'>
@@ -23,11 +24,11 @@ export type UXIconProps = SVGIconProps & {
     icon: UXIconData
 }
 
-export type UXLazyIconProps = Omit<SVGIconProps, 'name'> & {
+export type UXLazyIconProps<Name extends string = string> = Omit<SVGIconProps, 'name'> & {
     /** the icon name, e.g. from an API response; an unknown name renders the fallback */
-    name: string | null | undefined
+    name: UXIconName<Name> | null | undefined
     /** the "loaders" map of "var/icons/loaders.js" */
-    loaders: UXIconLoaders
+    loaders: UXIconLoaders<Name>
     /** rendered while the icon loads, or for an unknown name (default: nothing) */
     fallback?: ReactNode
 }
@@ -59,13 +60,17 @@ export function UXIcon({ icon, ...props }: UXIconProps): ReactElement {
 }
 
 /**
- * Renders an icon by a name known only at runtime, loading that icon alone, like {@link UXIcon} once loaded.
+ * Loads an icon by a name known only at runtime: null while it loads, for an unknown name, or if it fails to load.
  *
  *     import { loaders } from '../var/icons/loaders.js';
  *
- *     <UXLazyIcon name={data.icon} loaders={loaders} fallback={<Spinner />} />
+ *     const icon = useIcon(loaders, data.icon);
+ *     return icon ? <UXIcon icon={icon} /> : <Spinner />;
  */
-export function UXLazyIcon({ name, loaders, fallback = null, ...props }: UXLazyIconProps): ReactNode {
+export function useIcon<Name extends string>(
+    loaders: UXIconLoaders<Name>,
+    name: UXIconName<Name> | null | undefined
+): UXIconData<Name> | null {
     // an icon loaded earlier renders at once, without a fallback flash
     const [icon, setIcon] = useState(() => getLoadedIcon(loaders, name))
 
@@ -82,7 +87,25 @@ export function UXLazyIcon({ name, loaders, fallback = null, ...props }: UXLazyI
     }, [loaders, name])
 
     // until the effect runs, the state may still hold the icon of the previous name
-    return icon !== null && icon.name === name ? createElement(UXIcon, { ...props, icon }) : fallback
+    return icon !== null && icon.name === name ? icon : getLoadedIcon(loaders, name)
+}
+
+/**
+ * Renders an icon by a name known only at runtime, loading that icon alone, like {@link UXIcon} once loaded.
+ *
+ *     import { loaders } from '../var/icons/loaders.js';
+ *
+ *     <UXLazyIcon name={data.icon} loaders={loaders} fallback={<Spinner />} />
+ */
+export function UXLazyIcon<Name extends string>({
+    name,
+    loaders,
+    fallback = null,
+    ...props
+}: UXLazyIconProps<Name>): ReactNode {
+    const icon = useIcon(loaders, name)
+
+    return icon !== null ? createElement(UXIcon, { ...props, icon }) : fallback
 }
 
 /**

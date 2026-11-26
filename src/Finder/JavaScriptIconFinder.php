@@ -18,12 +18,14 @@ use function count;
 
 use Silarhi\UxIconsJsBundle\IconsDumper;
 use Symfony\Component\Finder\Finder;
+use Symfony\UX\Icons\Icon;
 use Symfony\UX\Icons\IconFinderInterface;
 
 /**
- * Finds the icons imported in JavaScript files from the module dumped by {@see IconsDumper}, for the "ux:icons:lock" command.
+ * Finds the icons imported in JavaScript files from the module dumped by {@see IconsDumper}, and the icons of the "<ux-icon>" elements, for the "ux:icons:lock" command.
  *
  *     import { LucideTrash2Icon, HeroiconsXMarkIcon as Close } from '../var/icons/index.js';
+ *     <ux-icon name="lucide:trash-2"></ux-icon>
  *
  * Export names are not reversible ("lucide:trash-2" and "lucide:trash2" are both exported as "LucideTrash2Icon"), so every candidate name is returned: the lock command skips unknown icon sets and icons.
  *
@@ -33,6 +35,9 @@ final readonly class JavaScriptIconFinder implements IconFinderInterface
 {
     // import { A, B as C } from '../var/icons/index.js', or import type { A } from '@/icons'
     private const IMPORT_PATTERN = '#\bimport\s+(?:type\s+)?\{([^}]*)\}\s*from\s*([\'"])([^\'"]*icons[^\'"]*)\2#i';
+
+    // <ux-icon name="lucide:trash-2" class="..."></ux-icon>, see "defineIconElement()"
+    private const ELEMENT_PATTERN = '#<ux-icon\s(?:[^>]*?\s)?name\s*=\s*([\'"])([^\'"]+)\1#i';
 
     /**
      * @param list<string> $directories
@@ -56,11 +61,17 @@ final readonly class JavaScriptIconFinder implements IconFinderInterface
             ->files()
             ->in($directories)
             ->exclude(['node_modules', 'vendor'])
-            ->name(['*.js', '*.mjs', '*.jsx', '*.ts', '*.mts', '*.tsx', '*.vue', '*.svelte']);
+            ->name(['*.js', '*.mjs', '*.jsx', '*.ts', '*.mts', '*.tsx', '*.vue', '*.svelte', '*.html', '*.twig']);
 
         $found = [];
         foreach ($files as $file) {
-            $count = preg_match_all(self::IMPORT_PATTERN, $file->getContents(), $imports);
+            $contents = $file->getContents();
+
+            // a dynamic name ("{{ name }}", "${name}") is not a valid icon name
+            preg_match_all(self::ELEMENT_PATTERN, $contents, $elements);
+            $found[] = array_values(array_filter($elements[2], Icon::isValidName(...)));
+
+            $count = preg_match_all(self::IMPORT_PATTERN, $contents, $imports);
             if (false === $count || 0 === $count) {
                 continue;
             }

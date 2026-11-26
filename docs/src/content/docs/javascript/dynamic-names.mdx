@@ -51,6 +51,28 @@ loadIcon(loaders: UXIconLoaders, name: string | null | undefined): Promise<UXIco
   icon already loaded, synchronously.
 - Rejects if the module fails to load (e.g. a network error); the next call tries again.
 
+## `preloadIcons()` and `hasIcon()`
+
+`preloadIcons()` loads several icons at once, e.g. the icons of a menu before it opens, so that they render without a
+fallback. It resolves to the icons in the same order, `null` for an unknown name:
+
+```js
+import { hasIcon, preloadIcons } from '@silarhi/ux-icons-js'
+
+await preloadIcons(
+    loaders,
+    items.map((item) => item.icon)
+)
+```
+
+`hasIcon()` tells whether the dump knows a name, without loading it, e.g. to validate a name from a CMS:
+
+```js
+if (!hasIcon(loaders, block.icon)) {
+    console.warn(`Unknown icon "${block.icon}"`)
+}
+```
+
 ## React, Preact and Vue
 
 `UXLazyIcon` takes the `name` and the `loaders`, and the other props of `UXIcon`. It renders the fallback while the
@@ -73,6 +95,42 @@ With Preact, import it from `@silarhi/ux-icons-js/preact`; the props are the sam
 
 An icon loaded earlier renders at once, without the fallback, also during a server-side render.
 
+### `useIcon()`
+
+To render the icon yourself, `useIcon()` returns it once loaded, and `null` while it loads, for an unknown name, or if
+it fails to load. It is a hook in React and Preact:
+
+```jsx
+import { UXIcon, useIcon } from '@silarhi/ux-icons-js/react'
+
+function StatusBadge({ status }) {
+    const icon = useIcon(loaders, status.icon)
+
+    return <span className="badge">{icon ? <UXIcon icon={icon} /> : status.label}</span>
+}
+```
+
+and a composable in Vue, which takes the name as a value, a ref or a getter, and returns a ref:
+
+```vue
+<script setup>
+import { UXIcon, useIcon } from '@silarhi/ux-icons-js/vue'
+import { loaders } from '../var/icons/loaders.js'
+
+const props = defineProps(['status'])
+const icon = useIcon(loaders, () => props.status.icon)
+</script>
+
+<template>
+    <UXIcon v-if="icon" :icon="icon" />
+</template>
+```
+
+## Without a framework
+
+The [`<ux-icon>` element](/javascript/custom-element/) renders an icon by its name in plain HTML: Twig templates, Turbo
+Streams, HTML built by a Stimulus controller.
+
 ## TypeScript
 
 The dumped `loaders.d.ts` exports the union of the dumped names, to type your API responses:
@@ -86,8 +144,24 @@ interface Status {
 }
 ```
 
+The names are typed from the loaders: your editor suggests the dumped names for `loadIcon()`, `useIcon()` and the
+`name` of `UXLazyIcon`, and `loadIcon()` resolves to a `UXIconData<IconName>`. Any other string is still accepted, as a
+name from an API is only known at runtime. `hasIcon()` narrows a string to `IconName`:
+
+```ts
+const name: string = data.icon
+if (hasIcon(loaders, name)) {
+    // name: IconName
+}
+```
+
+This needs TypeScript 5.4 or later (`NoInfer`).
+
 ## Only local icons
 
 Like the named exports, the loaders only know the dumped, local icons. `ux:icons:lock` cannot guess the names an API
 returns: download them first with `ux:icons:import` (see [remote icons](/php/remote-icons/)), or keep them in your icon
 directory.
+
+An application that never loads an icon by its name can skip `loaders.js` and the icon modules with
+[`dump_loaders: false`](/reference/configuration/).

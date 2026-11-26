@@ -3,8 +3,8 @@ import { createRoot } from 'react-dom/client'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { act as testUtilsAct } from 'react-dom/test-utils'
 import { describe, expect, test, vi } from 'vitest'
-import { loadIcon, type UXIconData } from '../src/index'
-import { UXIcon, type UXIconProps, UXLazyIcon } from '../src/react'
+import { loadIcon, type UXIconData, type UXIconLoaders } from '../src/index'
+import { UXIcon, type UXIconProps, UXLazyIcon, useIcon } from '../src/react'
 
 // "act" is exported by "react" since React 18.3, and deprecated in "react-dom/test-utils" since React 19
 const act = reactAct ?? testUtilsAct
@@ -204,4 +204,29 @@ describe('UXLazyIcon', () => {
 
         expect(container.querySelector('path')?.getAttribute('d')).toBe('M0 0')
     })
+
+    test('useIcon returns the icon once loaded', async () => {
+        const loaders = { 'lucide:trash-2': () => Promise.resolve({ default: icon }) }
+        const seen: (UXIconData | null)[] = []
+
+        await render(createElement(Probe, { loaders, name: 'lucide:trash-2', seen }))
+
+        expect(seen[0]).toBeNull()
+        expect(seen.at(-1)).toBe(icon)
+    })
+
+    test('accepts any name with typed loaders', () => {
+        const trash = { ...icon, name: 'lucide:trash-2' as const }
+        const loaders: UXIconLoaders<'lucide:trash-2'> = { 'lucide:trash-2': () => Promise.resolve({ default: trash }) }
+        const name: string = 'lucide:other'
+
+        expect(createElement(UXLazyIcon<'lucide:trash-2'>, { name, loaders }).props.name).toBe(name)
+        expect(createElement(UXLazyIcon, { name: 'lucide:trash-2', loaders }).props.loaders).toBe(loaders)
+    })
 })
+
+function Probe({ loaders, name, seen }: { loaders: UXIconLoaders; name: string; seen: (UXIconData | null)[] }): null {
+    seen.push(useIcon(loaders, name))
+
+    return null
+}

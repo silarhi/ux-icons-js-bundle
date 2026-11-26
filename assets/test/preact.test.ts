@@ -2,8 +2,8 @@ import { type ComponentChild, h, render as renderInto, type VNode } from 'preact
 import { act } from 'preact/test-utils'
 import { renderToStaticMarkup } from 'preact-render-to-string'
 import { describe, expect, test, vi } from 'vitest'
-import { loadIcon, type UXIconData } from '../src/index'
-import { UXIcon, UXLazyIcon } from '../src/preact'
+import { loadIcon, type UXIconData, type UXIconLoaders } from '../src/index'
+import { UXIcon, UXLazyIcon, useIcon } from '../src/preact'
 
 const icon: UXIconData = {
     name: 'lucide:trash-2',
@@ -156,4 +156,20 @@ describe('UXLazyIcon', () => {
         await settle(() => pending.resolve({ default: other }))
         expect(container.querySelector('path')?.getAttribute('d')).toBe('M0 0')
     })
+
+    test('useIcon returns the icon once loaded', async () => {
+        const loaders = { 'lucide:trash-2': () => Promise.resolve({ default: icon }) }
+        const seen: (UXIconData | null)[] = []
+
+        await render(h(Probe, { loaders, name: 'lucide:trash-2', seen }))
+
+        expect(seen[0]).toBeNull()
+        expect(seen.at(-1)).toBe(icon)
+    })
 })
+
+function Probe({ loaders, name, seen }: { loaders: UXIconLoaders; name: string; seen: (UXIconData | null)[] }): null {
+    seen.push(useIcon(loaders, name))
+
+    return null
+}
