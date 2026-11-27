@@ -7,7 +7,6 @@
 /.prettierignore export-ignore
 /.prettierrc export-ignore
 /CONTRIBUTING.md export-ignore
-/composer-dependency-analyser.php export-ignore
 /docs export-ignore
 /assets export-ignore
 /package.json export-ignore

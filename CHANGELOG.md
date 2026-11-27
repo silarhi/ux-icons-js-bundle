@@ -20,9 +20,8 @@ same git tag; the npm package version follows that tag.
   `symfony/http-kernel` (the cache warmer) and `symfony/event-dispatcher` (the listener of `ux:icons:import` and
   `ux:icons:lock`) are required instead, with `ext-ctype` and `ext-libxml`. `symfony/ux-icons` still requires the
   framework until [symfony/ux#4378](https://github.com/symfony/ux/pull/4378) is released.
-- The CI checks with `shipmonk/composer-dependency-analyser` that `src/` only uses the required packages. The PHPUnit
-  job without the framework, `symfony/config` and `symfony/dependency-injection` comes once symfony/ux#4378 is
-  released.
+- The CI job running PHPUnit without the framework, `symfony/config` and `symfony/dependency-injection` comes once
+  symfony/ux#4378 is released.
 
 ## [0.4.0] - 2026-11-26
 

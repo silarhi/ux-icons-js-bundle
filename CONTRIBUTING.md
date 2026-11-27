@@ -15,10 +15,8 @@ cd assets && pnpm install
 
 The CI runs PHPUnit on every supported PHP version, with the lowest and the latest dependencies: PHP 8.2 and 8.3 test
 `symfony/ux-icons` 2.x, PHP 8.4 both majors. PHPStan runs once on the latest PHP and dependencies, where every
-version-dependent code path exists; PHP CS Fixer, the `composer.json` checks and the Composer dependency analyser run
-once too. The analyser fails when `src/` uses a package outside `require`: the framework, `symfony/config` and
-`symfony/dependency-injection` are dev-only, allowed in `SilarhiUxIconsJsBundle.php` and `DependencyInjection/` alone.
-It does not run Rector: run it locally before opening a pull request.
+version-dependent code path exists; PHP CS Fixer and the `composer.json` checks run once too. It does not run Rector:
+run it locally before opening a pull request.
 
 ```bash
 # Tests
@@ -36,9 +34,6 @@ vendor/bin/rector process --dry-run
 # composer.json
 composer validate --strict
 composer normalize --dry-run
-
-# Dependencies used by src/ (latest PHP)
-vendor/bin/composer-dependency-analyser
 ```
 
 The `@silarhi/ux-icons-js` package lives in [`assets/`](assets):
