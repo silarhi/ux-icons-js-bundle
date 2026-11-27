@@ -25,7 +25,7 @@
             }
         },
         {
-            "name": "PHPStan on the latest stable PHP and symfony/ux-icons",
+            "name": "PHPStan on the latest PHP",
             "job": {
                 "php": "8.5",
                 "dependencies": "latest",
