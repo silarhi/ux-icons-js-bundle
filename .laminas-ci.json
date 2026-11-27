@@ -25,9 +25,9 @@
             }
         },
         {
-            "name": "PHPStan on the latest stable PHP and symfony/ux-icons",
+            "name": "PHPStan on the latest PHP",
             "job": {
-                "php": "8.5",
+                "php": "@latest",
                 "dependencies": "latest",
                 "command": "vendor/bin/phpstan analyse --no-progress"
             }
