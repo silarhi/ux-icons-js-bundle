@@ -26,6 +26,11 @@ The repository ships two packages, released from the same git tag.
 `symfony/ux-icons` 3 needs PHP 8.4. On `symfony/ux-icons` 2.x, `ux:icons:lock` does not find the icons imported in
 JavaScript, and boolean attributes follow the 3.x rules: see [compatibility](/reference/compatibility/).
 
+`symfony/framework-bundle`, `symfony/config` and `symfony/dependency-injection` are not required by the package: only
+the bundle class uses them, and an application without a kernel builds the dumper by hand (see the
+[README](https://github.com/silarhi/ux-icons-js-bundle#without-the-bundle)). `symfony/ux-icons` still requires the
+framework until [symfony/ux#4378](https://github.com/symfony/ux/pull/4378) is released.
+
 ## PHP
 
 ```bash

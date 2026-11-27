@@ -379,8 +379,8 @@ final readonly class IconsDumper
             }
         }
 
-        $includeRegex = self::patternRegex($included);
-        $excludeRegex = self::patternRegex($excluded);
+        $includeRegex = $this->patternRegex($included);
+        $excludeRegex = $this->patternRegex($excluded);
 
         return array_filter($names, static fn (string $name): bool => (null === $includeRegex || 1 === preg_match($includeRegex, $name))
             && (null === $excludeRegex || 1 !== preg_match($excludeRegex, $name)));
@@ -389,7 +389,7 @@ final readonly class IconsDumper
     /**
      * @param list<string> $patterns
      */
-    private static function patternRegex(array $patterns): ?string
+    private function patternRegex(array $patterns): ?string
     {
         $patterns = array_filter($patterns, static fn (string $pattern): bool => '' !== $pattern);
         if ([] === $patterns) {

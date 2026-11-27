@@ -13,9 +13,8 @@ declare(strict_types=1);
 
 namespace Silarhi\UxIconsJsBundle\Tests\DependencyInjection;
 
-use function dirname;
-
 use LogicException;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Silarhi\UxIconsJsBundle\DependencyInjection\UxIconsConfigurationPass;
 use Symfony\Component\Config\Resource\DirectoryResource;
@@ -23,6 +22,12 @@ use Symfony\Component\Config\Resource\FileExistenceResource;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 
+/**
+ * Needs symfony/config and symfony/dependency-injection, which only the bundle uses: the "PHPUnit without the bundle
+ * dependencies" CI job, added once symfony/ux#4378 stops symfony/ux-icons from requiring the framework, excludes this
+ * group.
+ */
+#[Group('bundle')]
 final class UxIconsConfigurationPassTest extends TestCase
 {
     public function testRequiresUxIconsBundle(): void
@@ -36,7 +41,7 @@ final class UxIconsConfigurationPassTest extends TestCase
     public function testTracksTheIconDirectories(): void
     {
         $container = new ContainerBuilder();
-        $container->setParameter('fixtures_dir', dirname(__DIR__) . '/Fixtures');
+        $container->setParameter('fixtures_dir', __DIR__ . '/../Fixtures');
         $container->setDefinition(UxIconsConfigurationPass::RENDERER, new Definition(null, [null, [], [], [], []]));
         $container->setDefinition(UxIconsConfigurationPass::LOCAL_REGISTRY, new Definition(null, [null, '%fixtures_dir%/icons', [
             'img' => '%fixtures_dir%/images',
@@ -48,7 +53,7 @@ final class UxIconsConfigurationPassTest extends TestCase
         (new UxIconsConfigurationPass())->process($container);
 
         $resources = array_map(strval(...), $container->getResources());
-        $fixturesDir = dirname(__DIR__) . '/Fixtures';
+        $fixturesDir = __DIR__ . '/../Fixtures';
 
         self::assertContains((string) new DirectoryResource($fixturesDir . '/icons', '/\.svg$/'), $resources);
         self::assertContains((string) new DirectoryResource($fixturesDir . '/images', '/\.svg$/'), $resources);

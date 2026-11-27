@@ -26,7 +26,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
- * @internal
+ * Dumps the icons on demand: the bundle registers it, an application without the bundle adds it to its console.
  */
 #[AsCommand(
     name: 'ux-icons-js:dump',
