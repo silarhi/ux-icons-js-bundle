@@ -13,11 +13,18 @@ declare(strict_types=1);
 
 namespace Silarhi\UxIconsJsBundle\Tests;
 
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Silarhi\UxIconsJsBundle\SilarhiUxIconsJsBundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 
+/**
+ * Needs symfony/config and symfony/dependency-injection, which only the bundle uses: the "PHPUnit without the bundle
+ * dependencies" CI job, added once symfony/ux#4378 stops symfony/ux-icons from requiring the framework, excludes this
+ * group.
+ */
+#[Group('bundle')]
 final class SilarhiUxIconsJsBundleTest extends TestCase
 {
     public function testPrependsTheDefaultDumpDirectory(): void

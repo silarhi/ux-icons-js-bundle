@@ -21,8 +21,6 @@ use Symfony\UX\Icons\IconRegistryInterface;
  * Resolves an icon with its configured attributes (default, icon set, and suffix), like the "ux_icon()" Twig function.
  *
  * Port of the attribute resolution of the (final, internal) "Symfony\UX\Icons\IconRenderer": invocation attributes and the automatic "aria-hidden" are not applied, the JavaScript side does it.
- *
- * @internal
  */
 final readonly class IconResolver
 {

@@ -74,6 +74,10 @@ PHP 8.2+, Symfony 6.4 / 7.x / 8.x, `symfony/ux-icons` 2.36.1+ or 3.5+ (3.x needs
 [compatibility notes](https://ux-icons-js-bundle.silarhi.dev/reference/compatibility/) for 2.x). React 18/19,
 Preact 10/11 and Vue 3 are optional peer dependencies.
 
+The package does not require `symfony/framework-bundle`, `symfony/config` nor `symfony/dependency-injection`: only the
+bundle class uses them, see [Without the bundle](#without-the-bundle). `symfony/ux-icons` still requires the framework
+until [symfony/ux#4378](https://github.com/symfony/ux/pull/4378) is released; the CI job testing without it comes then.
+
 ## Installation
 
 ```bash
@@ -85,6 +89,36 @@ pnpm add @silarhi/ux-icons-js
 // config/bundles.php — after UXIconsBundle, whose configuration it reuses
 Silarhi\UxIconsJsBundle\SilarhiUxIconsJsBundle::class => ['all' => true],
 ```
+
+### Without the bundle
+
+An application without a kernel builds the dumper and the `ux-icons-js:dump` command by hand, with the values of its
+`ux_icons` configuration:
+
+```php
+use Silarhi\UxIconsJsBundle\Command\DumpIconsCommand;
+use Silarhi\UxIconsJsBundle\IconResolver;
+use Silarhi\UxIconsJsBundle\IconsDumper;
+use Symfony\UX\Icons\IconFactory;
+use Symfony\UX\Icons\Registry\LocalSvgIconRegistry;
+
+$iconDir = __DIR__ . '/assets/icons';                   // icon_dir
+$iconSetPaths = ['flags' => __DIR__ . '/assets/flags']; // icon_sets.*.path
+$aliases = ['delete' => 'lucide:trash-2'];              // aliases
+
+$resolver = new IconResolver(
+    new LocalSvgIconRegistry(new IconFactory(), $iconDir, $iconSetPaths),
+    ['fill' => 'currentColor'],       // default_icon_attributes
+    $aliases,
+    ['flags' => ['class' => 'flag']], // icon_sets.*.icon_attributes
+);
+$dumper = new IconsDumper($resolver, $iconDir, $iconSetPaths, $aliases, __DIR__ . '/var/icons');
+
+$application->addCommands([new DumpIconsCommand($dumper)]); // or $dumper->dump()
+```
+
+`LocalSvgIconRegistry` and `IconFactory` are internal to `symfony/ux-icons`, with the same constructor from 2.36.1 to
+3.8. Without the bundle, nothing dumps the icons on cache warmup nor after `ux:icons:import`: run the command.
 
 ## Quick start
 

@@ -6,7 +6,22 @@ file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Both packages are released from the
 same git tag; the npm package version follows that tag.
 
-## [Unreleased]
+## [0.5.0] - Unreleased
+
+### Added
+
+- `IconResolver` and the `ux-icons-js:dump` command (`DumpIconsCommand`) are public API: an application without a
+  kernel builds `IconsDumper` and the command by hand, see "Without the bundle" in the README.
+
+### Changed
+
+- `symfony/framework-bundle`, `symfony/config` and `symfony/dependency-injection` are no longer required: only the
+  bundle class and its compiler pass use them, and a kernel always has them (`conflict` keeps them at 6.4+).
+  `symfony/http-kernel` (the cache warmer) and `symfony/event-dispatcher` (the listener of `ux:icons:import` and
+  `ux:icons:lock`) are required instead, with `ext-ctype` and `ext-libxml`. `symfony/ux-icons` still requires the
+  framework until [symfony/ux#4378](https://github.com/symfony/ux/pull/4378) is released.
+- The CI job running PHPUnit without the framework, `symfony/config` and `symfony/dependency-injection` comes once
+  symfony/ux#4378 is released.
 
 ## [0.4.0] - 2026-11-26
 
@@ -93,7 +108,7 @@ same git tag; the npm package version follows that tag.
 - Compared with symfony/ux#4072, `resolveIcon()` keeps the position of an attribute dumped as `false` or given as
   `null` when it is set again, so `renderIcon()` output is byte for byte identical to `ux_icon()`.
 
-[Unreleased]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.4.0...HEAD
+[0.5.0]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/silarhi/ux-icons-js-bundle/compare/v0.3.0...v0.3.1
